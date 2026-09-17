@@ -1,9 +1,9 @@
 {
   "name": "musewave-gpt",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "A ChatGPT music creation interface powered by an MCP server.",
+  "description": "A monetization-ready AI music creation studio for ChatGPT.",
   "scripts": {
     "dev": "node --watch server.mjs",
     "start": "node server.mjs",

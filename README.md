@@ -1,17 +1,22 @@
-# MuseWave GPT
+# MuseWave GPT — monetization-ready beta
 
-MuseWave is an original-music studio interface for ChatGPT. This first version focuses on product experience: users describe a track, choose genre, mood, energy, duration, and instrumental/vocal mode, then receive a structured music concept and a small browser-synth sketch.
+MuseWave is an original-music studio for ChatGPT. Version 0.2 includes a redesigned creation workspace, project library, lyrics and advanced controls, usage metering, plans, credits, commercial-license entitlements, and a checkout boundary. It remains free by default while demand is validated.
 
-The project does **not** clone voices or imitate named artists. A licensed music-generation provider can be added later behind the `create_music_concept` tool.
+The project does **not** clone voices or imitate named artists. A licensed music-generation provider can be added later behind the generation tool.
 
-## What is included
+## Included
 
 - ChatGPT-compatible MCP server at `/mcp`
-- Responsive embedded studio UI using the MCP Apps bridge
-- `open_music_studio` and `create_music_concept` tools
-- Deterministic BPM/key concept generation
-- Local Web Audio preview with no API key
-- Health endpoint and lightweight tests
+- Responsive embedded UI using the MCP Apps bridge
+- Creation, project-library, account, pricing, and checkout tools
+- Genre, mood, energy, duration, lyrics, language, seed, and quality controls
+- Deterministic browser-synth preview with no API key
+- Free, Creator, Pro, and Studio plan catalog
+- Credit-cost calculation and usage ledger
+- Free-beta feature flag with checkout disabled by default
+- External hosted-checkout adapter for later billing activation
+- Safety acknowledgement and original-music positioning
+- Health endpoint and automated tests
 
 ## Run locally
 
@@ -19,23 +24,34 @@ Requirements: Node.js 20 or newer.
 
 ```bash
 npm install
+cp .env.example .env
 npm test
-npm start
+npm run dev
 ```
 
-The MCP endpoint will be available at `http://localhost:8787/mcp`, with a health check at `http://localhost:8787/health`.
+The MCP endpoint is `http://localhost:8787/mcp`; the health endpoint is `http://localhost:8787/health`.
 
-To use it from ChatGPT, expose the local server over HTTPS during development, then add the public `/mcp` URL as a custom plugin/connector in developer mode. Follow the current [OpenAI plugin quickstart](https://developers.openai.com/plugins/build/app-quickstart).
+To use it from ChatGPT, expose the local server over HTTPS during development and add the public `/mcp` URL as a custom plugin in developer mode. Follow the current [OpenAI plugin quickstart](https://developers.openai.com/plugins/build/app-quickstart).
 
-## Provider integration point
+## Music-provider integration
 
-Replace or extend the handler for `create_music_concept` in `server.mjs`. Keep provider credentials on the server, never inside `public/music-studio.html`. A production flow will typically:
+Replace or extend the `create_music_concept` handler in `server.mjs`. Provider credentials must remain on the server, never inside the HTML component. A production workflow should validate and moderate the request, submit an asynchronous generation job, expose status through a read-only tool, and serve completed audio from controlled storage.
 
-1. Validate and moderate the request.
-2. Reject unauthorized voice cloning or direct artist impersonation.
-3. Submit an asynchronous generation job to a licensed provider.
-4. Return job status through a separate read-only tool.
-5. Serve the completed audio from controlled storage.
+## Turn on monetization later
+
+The product ships with `FREE_BETA=true`, so generations record simulated usage but never deduct credits or collect payment.
+
+Before changing it to `false`:
+
+1. Add OAuth so usage and projects belong to an authenticated user.
+2. Replace the in-memory store with a transactional database.
+3. Create hosted checkout pages for `creator`, `pro`, and `studio`.
+4. Configure `BILLING_CHECKOUT_BASE_URL`.
+5. Verify signed billing webhooks and update entitlements idempotently.
+6. Add refund, cancellation, tax, privacy, and terms flows.
+7. Connect a licensed music provider and confirm commercial-output rights.
+
+The plans and prices in this prototype are product assumptions, not finalized offers. OpenAI currently recommends that plugin developers choose their own external monetization approach; the checkout boundary in this repository follows that model.
 
 ## License
 
