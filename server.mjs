@@ -10,6 +10,8 @@ import { buildPreferenceProfile } from "./src/learning.mjs";
 import { canSpend, exportTrainingExamples, getAccount, getLearningStatus, listProjects, recordFeedback, saveProject, setLearningConsent } from "./src/store.mjs";
 
 const PORT = Number(process.env.PORT || 8787);
+const ENGINE_URL = (process.env.MUSEWAVE_ENGINE_URL || "").replace(/\/$/, "");
+const ENGINE_TOKEN = process.env.MUSEWAVE_ENGINE_TOKEN || "";
 const UI_URI = "ui://musewave/studio.html";
 const widgetHtml = readFileSync(new URL("./public/music-studio.html", import.meta.url), "utf8");
 
@@ -54,6 +56,21 @@ async function readJson(req) {
 function json(res, status, payload) {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
   res.end(JSON.stringify(payload));
+}
+
+function engineHeaders(jsonBody = false) {
+  return { ...(jsonBody ? { "content-type": "application/json" } : {}), ...(ENGINE_TOKEN ? { authorization: `Bearer ${ENGINE_TOKEN}` } : {}) };
+}
+
+async function engineFetch(path, options = {}) {
+  if (!ENGINE_URL) throw new Error("MuseWave Engine is not configured");
+  const response = await fetch(`${ENGINE_URL}${path}`, { ...options, headers: { ...engineHeaders(Boolean(options.body)), ...options.headers }, signal: AbortSignal.timeout(120_000) });
+  if (!response.ok) {
+    let message = `MuseWave Engine returned ${response.status}`;
+    try { message = (await response.json()).detail || message; } catch {}
+    throw new Error(message);
+  }
+  return response;
 }
 
 function createConcept(input) {
@@ -154,6 +171,15 @@ const httpServer = createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/api/bootstrap") return json(res, 200, { structuredContent: { account: accountPayload(), projects: listProjects(), plans: Object.values(PLANS) } });
     if (req.method === "GET" && req.url === "/api/projects") return json(res, 200, { structuredContent: { projects: listProjects(), account: accountPayload() } });
     if (req.method === "GET" && req.url === "/api/learning") return json(res, 200, { structuredContent: { learning: getLearningStatus(), profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } });
+    if (req.method === "GET" && req.url === "/api/engine/status") {
+      if (!ENGINE_URL) return json(res, 200, { configured: false, ready: false });
+      return json(res, 200, { configured: true, ...(await (await engineFetch("/health")).json()) });
+    }
+    if (req.method === "POST" && req.url === "/api/engine/generate") {
+      const response = await engineFetch("/v1/generate", { method: "POST", body: JSON.stringify(await readJson(req)) });
+      res.writeHead(200, { "content-type": "audio/wav", "cache-control": "private, no-store", "x-musewave-seed": response.headers.get("x-musewave-seed") || "" });
+      res.end(Buffer.from(await response.arrayBuffer())); return;
+    }
     if (req.method === "POST" && req.url === "/api/concepts") return json(res, 201, { structuredContent: createConcept(await readJson(req)) });
     if (req.method === "POST" && req.url === "/api/learning/consent") { const body = await readJson(req); const learning = setLearningConsent(body.enabled); return json(res, 200, { structuredContent: { learning, account: accountPayload() } }); }
     if (req.method === "POST" && req.url === "/api/feedback") { const body = await readJson(req); const learning = recordFeedback(body); return json(res, 200, { structuredContent: { learning, profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } }); }

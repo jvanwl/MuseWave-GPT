@@ -20,4 +20,16 @@ test("server exposes the MCP endpoint and UI resource", () => {
   assert.match(server, /list_music_projects/);
   assert.match(server, /rate_music_project/);
   assert.match(server, /set_personalization_consent/);
+  assert.match(server, /MUSEWAVE_ENGINE_URL/);
+  assert.match(server, /\/api\/engine\/generate/);
+});
+
+test("repository contains an owned engine and secure persistence schema", () => {
+  const model = readFileSync(new URL("../engine/musewave_engine/model.py", import.meta.url), "utf8");
+  const dataset = readFileSync(new URL("../engine/musewave_engine/dataset.py", import.meta.url), "utf8");
+  const schema = readFileSync(new URL("../supabase/schema.sql", import.meta.url), "utf8");
+  assert.match(model, /class MuseWaveGenerator/);
+  assert.match(dataset, /performer_consent_id/);
+  assert.match(schema, /enable row level security/);
+  assert.match(schema, /storage\.buckets/);
 });
