@@ -1,6 +1,6 @@
 # MuseWave GPT — monetization-ready beta
 
-MuseWave is an original-music studio for ChatGPT. Version 0.2 includes a redesigned creation workspace, project library, lyrics and advanced controls, usage metering, plans, credits, commercial-license entitlements, and a checkout boundary. It remains free by default while demand is validated.
+MuseWave is an original-music studio for ChatGPT. Version 0.3 adds a consent-based learning system and an optional PyTorch neural preference network to the redesigned studio, project library, advanced controls, usage metering, plans, credits, entitlements, and checkout boundary.
 
 The project does **not** clone voices or imitate named artists. A licensed music-generation provider can be added later behind the generation tool.
 
@@ -16,6 +16,10 @@ The project does **not** clone voices or imitate named artists. A licensed music
 - Free-beta feature flag with checkout disabled by default
 - External hosted-checkout adapter for later billing activation
 - Safety acknowledgement and original-music positioning
+- Explicit opt-in and per-user feedback collection
+- Preference profiling and neural-network-ready feature extraction
+- Optional 32→16-neuron PyTorch ranking model with controlled offline training
+- Model-readiness, version, confidence, and feedback status UI
 - Health endpoint and automated tests
 
 ## Run locally
@@ -52,6 +56,12 @@ Before changing it to `false`:
 7. Connect a licensed music provider and confirm commercial-output rights.
 
 The plans and prices in this prototype are product assumptions, not finalized offers. OpenAI currently recommends that plugin developers choose their own external monetization approach; the checkout boundary in this repository follows that model.
+
+## Learning architecture
+
+MuseWave does not claim consciousness or unrestricted self-improvement. It learns from explicit 1–5 ratings only after a user opts in. The application creates a fixed music-feature vector; the optional PyTorch service trains a small ranking network that predicts personal preference. Training is offline, artifacts are versioned, and promotion requires evaluation and owner approval.
+
+This boundary prevents uncontrolled web ingestion, self-modifying code, cross-user data mixing, and automatic deployment. Before production, add authenticated per-user storage, deletion/export controls, encryption, holdout evaluation, drift monitoring, a model registry, and rollback.
 
 ## License
 

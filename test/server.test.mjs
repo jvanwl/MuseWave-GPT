@@ -18,4 +18,6 @@ test("server exposes the MCP endpoint and UI resource", () => {
   assert.match(server, /registerAppTool/);
   assert.match(server, /get_musewave_account/);
   assert.match(server, /list_music_projects/);
+  assert.match(server, /rate_music_project/);
+  assert.match(server, /set_personalization_consent/);
 });

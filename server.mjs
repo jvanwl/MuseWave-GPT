@@ -6,7 +6,8 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { billingStatus, checkoutFor } from "./src/billing.mjs";
 import { FREE_BETA, generationCost, PLANS } from "./src/plans.mjs";
-import { canSpend, getAccount, listProjects, saveProject } from "./src/store.mjs";
+import { buildPreferenceProfile } from "./src/learning.mjs";
+import { canSpend, exportTrainingExamples, getAccount, getLearningStatus, listProjects, recordFeedback, saveProject, setLearningConsent } from "./src/store.mjs";
 
 const PORT = Number(process.env.PORT || 8787);
 const UI_URI = "ui://musewave/studio.html";
@@ -25,7 +26,7 @@ const genres = ["Pop", "Electronic", "Hip-hop", "R&B", "Rock", "Ambient", "Latin
 const moods = ["Euphoric", "Dreamy", "Dark", "Romantic", "Focused", "Nostalgic", "Confident", "Peaceful"];
 
 function hash(text) { return [...text].reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0); }
-function accountPayload() { return { ...billingStatus(getAccount()), projectsCount: listProjects().length }; }
+function accountPayload() { return { ...billingStatus(getAccount()), projectsCount: listProjects().length, learning: getLearningStatus() }; }
 
 function buildConcept(input, cost) {
   const seed = Math.abs(hash(`${input.prompt}:${input.genre}:${input.mood}:${input.seed ?? ""}`));
@@ -44,7 +45,7 @@ function buildConcept(input, cost) {
 }
 
 function createMuseWaveServer() {
-  const server = new McpServer({ name: "musewave-gpt", version: "0.2.0" });
+  const server = new McpServer({ name: "musewave-gpt", version: "0.3.0" });
   registerAppResource(server, "musewave-studio", UI_URI, {}, async () => ({
     contents: [{ uri: UI_URI, mimeType: RESOURCE_MIME_TYPE, text: widgetHtml }],
   }));
@@ -87,12 +88,42 @@ function createMuseWaveServer() {
     title: "Start MuseWave plan checkout", description: "Prepare an external checkout for a paid MuseWave plan. Disabled during free beta.",
     inputSchema: { planId: z.enum(["creator", "pro", "studio"]) }, outputSchema: { checkout: z.any() }, _meta: { ui: { resourceUri: UI_URI } },
   }, async ({ planId }) => { const checkout = checkoutFor(planId); return { content: [{ type: "text", text: checkout.message }], structuredContent: { checkout } }; });
+
+  registerAppTool(server, "set_personalization_consent", {
+    title: "Set MuseWave learning consent",
+    description: "Turn per-user preference learning on or off. MuseWave records ratings only after explicit opt-in.",
+    inputSchema: { enabled: z.boolean() }, outputSchema: { learning: z.any() }, _meta: { ui: { resourceUri: UI_URI } },
+  }, async ({ enabled }) => {
+    const learning = setLearningConsent(enabled);
+    return { content: [{ type: "text", text: enabled ? "Personalized learning enabled." : "Personalized learning disabled." }], structuredContent: { learning, account: accountPayload() } };
+  });
+
+  registerAppTool(server, "rate_music_project", {
+    title: "Rate a MuseWave project",
+    description: "Record a 1–5 rating and optional preference tags for a saved project after personalization consent.",
+    inputSchema: { projectId: z.string().min(1), rating: z.number().int().min(1).max(5), tags: z.array(z.string().max(30)).max(8).default([]) },
+    outputSchema: { learning: z.any(), profile: z.any() }, _meta: { ui: { resourceUri: UI_URI } },
+  }, async (event) => {
+    try {
+      const learning = recordFeedback(event);
+      const profile = buildPreferenceProfile(exportTrainingExamples());
+      return { content: [{ type: "text", text: `Rating saved. MuseWave has ${learning.feedbackCount} learning examples.` }], structuredContent: { learning, profile, account: accountPayload() } };
+    } catch (error) {
+      return { isError: true, content: [{ type: "text", text: error.message }] };
+    }
+  });
+
+  registerAppTool(server, "get_learning_status", {
+    title: "Check MuseWave learning status",
+    description: "Show personalization consent, training readiness, feedback count, and the current preference profile.",
+    inputSchema: {}, outputSchema: { learning: z.any(), profile: z.any() }, _meta: { ui: { resourceUri: UI_URI } },
+  }, async () => ({ content: [{ type: "text", text: "MuseWave learning status loaded." }], structuredContent: { learning: getLearningStatus(), profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } }));
   return server;
 }
 
 const httpServer = createServer(async (req, res) => {
   res.setHeader("x-content-type-options", "nosniff");
-  if (req.method === "GET" && req.url === "/health") { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ ok: true, name: "musewave-gpt", version: "0.2.0", freeBeta: FREE_BETA })); return; }
+  if (req.method === "GET" && req.url === "/health") { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ ok: true, name: "musewave-gpt", version: "0.3.0", freeBeta: FREE_BETA })); return; }
   if (req.url === "/mcp") {
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on("close", () => transport.close());
@@ -101,4 +132,4 @@ const httpServer = createServer(async (req, res) => {
   res.writeHead(404, { "content-type": "application/json" }); res.end(JSON.stringify({ error: "Not found" }));
 });
 
-httpServer.listen(PORT, () => console.log(`MuseWave GPT v0.2 listening on http://localhost:${PORT}/mcp`));
+httpServer.listen(PORT, () => console.log(`MuseWave GPT v0.3 listening on http://localhost:${PORT}/mcp`));
