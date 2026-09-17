@@ -7,7 +7,8 @@ test("widget contains the MCP Apps bridge and studio controls", () => {
   assert.match(html, /ui\/initialize/);
   assert.match(html, /tools\/call/);
   assert.match(html, /create_music_concept/);
-  assert.match(html, /Original music studio/);
+  assert.match(html, /FREE BETA/);
+  assert.match(html, /start_plan_checkout/);
 });
 
 test("server exposes the MCP endpoint and UI resource", () => {
@@ -15,4 +16,8 @@ test("server exposes the MCP endpoint and UI resource", () => {
   assert.match(server, /ui:\/\/musewave\/studio\.html/);
   assert.match(server, /req\.url === "\/mcp"/);
   assert.match(server, /registerAppTool/);
+  assert.match(server, /get_musewave_account/);
+  assert.match(server, /list_music_projects/);
+  assert.match(server, /rate_music_project/);
+  assert.match(server, /set_personalization_consent/);
 });
