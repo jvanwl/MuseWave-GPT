@@ -44,6 +44,26 @@ function buildConcept(input, cost) {
   };
 }
 
+async function readJson(req) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  if (!chunks.length) return {};
+  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+}
+
+function json(res, status, payload) {
+  res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
+  res.end(JSON.stringify(payload));
+}
+
+function createConcept(input) {
+  const cost = generationCost(input);
+  if (!canSpend(cost, !FREE_BETA)) throw new Error("Not enough credits");
+  const project = buildConcept(input, cost);
+  saveProject(project, cost, !FREE_BETA);
+  return { project, account: accountPayload() };
+}
+
 function createMuseWaveServer() {
   const server = new McpServer({ name: "musewave-gpt", version: "0.3.0" });
   registerAppResource(server, "musewave-studio", UI_URI, {}, async () => ({
@@ -67,10 +87,10 @@ function createMuseWaveServer() {
       lyrics: z.string().max(4000).default(""), seed: z.string().max(80).optional(),
     }, outputSchema: projectOutput, _meta: { ui: { resourceUri: UI_URI } },
   }, async (input) => {
-    const cost = generationCost(input);
-    if (!canSpend(cost, !FREE_BETA)) return { isError: true, content: [{ type: "text", text: "Not enough credits. Choose a plan or wait for the next credit refresh." }] };
-    const project = buildConcept(input, cost);
-    saveProject(project, cost, !FREE_BETA);
+    let result;
+    try { result = createConcept(input); }
+    catch (error) { return { isError: true, content: [{ type: "text", text: error.message }] }; }
+    const { project } = result;
     return { content: [{ type: "text", text: `Created “${project.title}” — ${project.genre}, ${project.bpm} BPM, ${project.key}.` }], structuredContent: { project, account: accountPayload() } };
   });
 
@@ -124,12 +144,23 @@ function createMuseWaveServer() {
 const httpServer = createServer(async (req, res) => {
   res.setHeader("x-content-type-options", "nosniff");
   if (req.method === "GET" && req.url === "/") {
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" });
-    res.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MuseWave</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 70% 0,#3e2457,transparent 40%),#090a0f;color:#f8f5ff;font-family:Inter,system-ui,sans-serif}.card{width:min(620px,calc(100% - 32px));padding:40px;border:1px solid #302b3b;border-radius:24px;background:#12131bdd;box-shadow:0 24px 80px #0007}.logo{width:52px;height:52px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,#ff659e,#8b7cff);font-size:25px}h1{font-size:46px;letter-spacing:-.06em;margin:20px 0 8px}p{color:#aaa5b6;line-height:1.6}.status{display:flex;align-items:center;gap:8px;margin:24px 0;padding:12px;border:1px solid #2b3e36;border-radius:12px;background:#102019;color:#a7e8c5}.dot{width:9px;height:9px;border-radius:50%;background:#52d690;box-shadow:0 0 15px #52d690}.links{display:flex;gap:10px;flex-wrap:wrap}a{color:white;text-decoration:none;padding:10px 14px;border:1px solid #34303e;border-radius:10px;background:#1a1b24;font-size:13px}small{display:block;margin-top:22px;color:#716d7c}</style></head><body><main class="card"><div class="logo">♪</div><h1>MuseWave</h1><p>Original AI music studio for ChatGPT. The service is online in free-beta mode.</p><div class="status"><span class="dot"></span>All systems operational · v0.3.0</div><div class="links"><a href="/health">Health status</a><a href="https://github.com/jvanwl/MuseWave-GPT">GitHub repository</a></div><small>MCP endpoint: /mcp · Payments disabled · Music provider: prototype</small></main></body></html>`);
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" });
+    res.end(widgetHtml);
     return;
   }
   if (req.method === "GET" && req.url === "/favicon.ico") { res.writeHead(204); res.end(); return; }
   if (req.method === "GET" && req.url === "/health") { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ ok: true, name: "musewave-gpt", version: "0.3.0", freeBeta: FREE_BETA })); return; }
+  try {
+    if (req.method === "GET" && req.url === "/api/bootstrap") return json(res, 200, { structuredContent: { account: accountPayload(), projects: listProjects(), plans: Object.values(PLANS) } });
+    if (req.method === "GET" && req.url === "/api/projects") return json(res, 200, { structuredContent: { projects: listProjects(), account: accountPayload() } });
+    if (req.method === "GET" && req.url === "/api/learning") return json(res, 200, { structuredContent: { learning: getLearningStatus(), profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } });
+    if (req.method === "POST" && req.url === "/api/concepts") return json(res, 201, { structuredContent: createConcept(await readJson(req)) });
+    if (req.method === "POST" && req.url === "/api/learning/consent") { const body = await readJson(req); const learning = setLearningConsent(body.enabled); return json(res, 200, { structuredContent: { learning, account: accountPayload() } }); }
+    if (req.method === "POST" && req.url === "/api/feedback") { const body = await readJson(req); const learning = recordFeedback(body); return json(res, 200, { structuredContent: { learning, profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } }); }
+    if (req.method === "POST" && req.url === "/api/checkout") { const body = await readJson(req); return json(res, 200, { structuredContent: { checkout: checkoutFor(body.planId) } }); }
+  } catch (error) {
+    return json(res, 400, { error: error.message });
+  }
   if (req.url === "/mcp") {
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on("close", () => transport.close());
