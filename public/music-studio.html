@@ -17,6 +17,28 @@
     .pricing{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.plan{padding:17px;position:relative}.plan.featured{border-color:#8b7cff}.popular{position:absolute;right:12px;top:12px;font-size:8px;background:#8b7cff;color:white;border-radius:99px;padding:4px 7px}.plan h3{margin:8px 0 3px}.price{font-size:28px;font-weight:850}.price small{font-size:10px;color:var(--muted);font-weight:500}.plan ul{padding-left:16px;color:#b2adba;font-size:10px;line-height:1.9;min-height:78px}.plan button{width:100%;border:1px solid var(--line);background:#1a1c26;color:white;border-radius:10px;padding:9px;font-weight:750;font-size:10px}.plan.featured button{background:linear-gradient(90deg,#ff77a9,#9c8eff);color:#160c18;border:0}.banner{border:1px solid #5f4c22;background:#211c10;color:#f1d88e;padding:11px 13px;border-radius:12px;font-size:11px;margin-bottom:14px}.learning-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.learn-card{padding:20px}.learn-card p{color:var(--muted);font-size:11px;line-height:1.6}.brain{height:140px;border-radius:15px;background:radial-gradient(circle,#ff6fa455,transparent 35%),linear-gradient(145deg,#1c1730,#111923);display:grid;place-items:center;font-size:58px}.toggle{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);padding:12px;border-radius:11px}.toggle input{width:auto}.learn-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.learn-stat{border:1px solid var(--line);padding:11px;border-radius:10px}.learn-stat b{display:block}.learn-stat span{font-size:9px;color:var(--muted)}.rating{display:flex;gap:5px;margin-top:10px}.rating button{border:1px solid var(--line);background:#11131a;color:#aaa;border-radius:8px;padding:6px;cursor:pointer}
     .game-shell{display:grid;grid-template-columns:minmax(520px,1fr) 270px;gap:14px}.game-map-card{padding:12px;min-height:570px;background:radial-gradient(circle at 50% 40%,#183448,#071018 70%);overflow:hidden}.game-toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 4px 12px}.game-toolbar h2{margin:0;font-size:21px}.turn-pill{font-size:10px;padding:7px 10px;border:1px solid #ffffff24;border-radius:99px}.world-map{width:100%;height:auto;display:block;filter:drop-shadow(0 16px 30px #0008)}.province{stroke:#080b10;stroke-width:3;cursor:pointer;transition:filter .15s,stroke .15s}.province:hover,.province.selected{filter:brightness(1.25);stroke:#fff;stroke-width:4}.province.player{fill:#9a76ff}.province.ember{fill:#e36558}.province.tide{fill:#3f9fba}.province.vale{fill:#60a66d}.province.neutral{fill:#6d7180}.province-label{fill:#fff;font-size:11px;font-weight:800;text-anchor:middle;pointer-events:none;text-shadow:0 1px 3px #000}.army-label{fill:#fff;font-size:9px;text-anchor:middle;pointer-events:none}.game-side{display:grid;gap:12px;align-content:start;border:0;padding:0;background:transparent}.game-panel{padding:16px}.game-panel h3{margin:0 0 12px}.game-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.game-stat{background:#090b10;border:1px solid var(--line);padding:10px;border-radius:10px}.game-stat b{display:block;font-size:17px}.game-stat span{font-size:8px;color:var(--muted);text-transform:uppercase}.province-info{min-height:122px;color:#c5c1cc;font-size:11px;line-height:1.6}.game-actions{display:grid;gap:7px}.game-actions button,.end-turn,.new-game{border:1px solid var(--line);background:#191c27;color:#fff;border-radius:10px;padding:10px;cursor:pointer;font-size:11px;font-weight:750}.game-actions button:hover,.end-turn:hover{border-color:#8b7cff}.game-actions button:disabled{opacity:.35;cursor:not-allowed}.end-turn{background:linear-gradient(90deg,#ff6f9f,#9c86ff);color:#150b18;border:0}.game-log{max-height:130px;overflow:auto;font-size:9px;line-height:1.6;color:#9fa2b1}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:#aaa}.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}.game-help{color:var(--muted);font-size:10px;line-height:1.6}.victory{display:none;padding:12px;border:1px solid #775d28;background:#28200f;color:#ffe39a;border-radius:11px;font-size:11px}.victory.show{display:block}
     @media(max-width:850px){.app{grid-template-columns:1fr}aside{border:0;border-bottom:1px solid var(--line);padding:12px}.brand{padding-bottom:10px}nav{grid-template-columns:repeat(3,1fr)}.usage{display:none}.studio,.game-shell{grid-template-columns:1fr}.pricing{grid-template-columns:1fr 1fr}.projects{grid-template-columns:1fr 1fr}.game-map-card{min-height:auto}}@media(max-width:520px){main{padding:12px}.row,.details-grid{grid-template-columns:1fr}.pricing,.projects{grid-template-columns:1fr}.top h1{display:none}.builder h2{font-size:26px}.game-map-card{padding:5px}.province-label{font-size:8px}}
+
+    /* Dominion: readable atlas, scoped to the game. */
+    #game-view{--line:#41483f;--muted:#abb1a5;--text:#ede9d9}
+    .dominion-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:8px 0 22px}.dominion-heading h2{font:500 clamp(25px,4vw,42px) Georgia,serif;letter-spacing:-.03em;margin:7px 0;color:#eee4c9}.dominion-heading p{color:#a7ada5;font-size:12px;margin:0}
+    #game-view .game-shell{grid-template-columns:minmax(0,1fr) 310px}
+    #game-view .game-map-card{background:linear-gradient(150deg,#1e343a,#101c21);min-height:0;align-self:start;border-color:#45534e;padding:18px}
+    #game-view .world-map{border:1px solid #57675b;border-radius:4px;filter:none;min-height:230px}
+    #game-view .world-map polygon{cursor:pointer;transition:filter .15s}#game-view .world-map polygon:hover,#game-view .world-map polygon:focus{filter:brightness(1.2);outline:none;stroke:#ffdc8b;stroke-width:4}
+    #game-view .game-panel{background:#171f20;border-color:#39433e;box-shadow:none}
+    #game-view .game-panel h3{font:500 19px Georgia,serif;color:#e6dfc9;margin:9px 0 14px}
+    #game-view .game-stat{background:#101718;border-color:#323e37}#game-view .game-stat b{font-size:19px;color:#e4d9ba}
+    #game-view select{background:#101819;border-color:#485248;font-size:12px}#game-view .game-actions{gap:8px}
+    #game-view .game-actions button,#game-view .new-game{background:#25302d;color:#e7e2d3;border-color:#475449;min-height:42px;font-size:12px;text-align:left}
+    #game-view .game-actions button:disabled{opacity:.42}#game-view .end-turn{background:#c3ad74;min-height:48px;font-size:14px}
+    #game-view .province-info{font-size:12px;line-height:1.8;padding-bottom:12px;min-height:0}
+    #game-view .legend{padding:16px 0 4px;font-size:11px;gap:18px}#game-view .legend span:nth-child(1){color:#b29bdc}#game-view .legend span:nth-child(2){color:#df947e}#game-view .legend span:nth-child(3){color:#8ac2d6}#game-view .legend span:nth-child(4){color:#9bbb87}
+    #game-view .game-help,#game-view .game-guide p{font-size:12px;line-height:1.7;color:#abb6ad}
+    #game-objective{font-size:12px;color:#d1c5a1}.chronicle-panel{margin-top:18px}#game-view .game-log{max-height:220px;font-size:12px;line-height:1.7}#game-view .game-log>div{padding:8px 0;border-bottom:1px solid #334038}
+    #game-status{font-size:12px;line-height:1.6;color:#d9cfae;padding:10px;border-left:2px solid #c3ad74}#game-save{font-size:11px;color:#a7b3a8;line-height:1.6}#reset-confirm[hidden]{display:none}
+    @media(max-width:1100px){#game-view .game-shell{grid-template-columns:minmax(0,1fr)}#game-view .game-side{grid-template-columns:repeat(2,minmax(0,1fr))}#game-view .game-side>div:nth-child(2){grid-row:span 5}#game-view .game-map-card{padding:10px}}
+    @media(max-width:600px){#game-view .game-side{grid-template-columns:1fr}.dominion-heading{align-items:flex-start;flex-direction:column}#game-view .world-map{min-height:0}#game-view .game-side>div:nth-child(2){grid-row:auto}#game-view .game-toolbar select{max-width:210px}}
+
   </style>
 </head>
 <body>
@@ -38,7 +60,30 @@
     </div></section>
     <section class="view" id="library-view"><div class="section-head"><div><h2>My music</h2><p>Your recent concepts and generations.</p></div><button class="pill upgrade" data-go="create">+ New track</button></div><div class="projects" id="projects"><div class="card empty">Create your first track to start your library.</div></div></section>
     <section class="view" id="learning-view"><div class="section-head"><div><h2>MuseWave Intelligence</h2><p>A private preference network that improves from explicit feedback.</p></div></div><div class="learning-grid"><article class="card learn-card"><div class="brain">◎</div><h3>Learning you control</h3><p>MuseWave learns only from tracks you rate after opting in. It cannot read unrelated conversations, scrape the web, rewrite its code, or deploy itself.</p><label class="toggle"><span>Personalized learning</span><input id="learning-consent" type="checkbox"></label></article><article class="card learn-card"><div class="eyebrow">Model status</div><h3 id="model-state">Waiting for consent</h3><p id="model-copy">Enable learning and rate at least 10 tracks.</p><div class="learn-stats"><div class="learn-stat"><b id="feedback-count">0</b><span>Ratings</span></div><div class="learn-stat"><b id="model-confidence">0%</b><span>Confidence</span></div><div class="learn-stat"><b id="model-version">—</b><span>Model</span></div></div><p>Neural architecture: 23 music features → 32 neurons → 16 neurons → preference score. Models require evaluation before controlled promotion.</p></article></div></section>
-    <section class="view" id="game-view"><div class="game-shell"><section class="card game-map-card"><div class="game-toolbar"><div><div class="eyebrow">Turn-based grand strategy</div><h2>Echoes of Dominion</h2></div><span class="turn-pill" id="game-turn">Turn 1 · 1200 AE</span></div><svg class="world-map" id="world-map" viewBox="0 0 800 560" role="img" aria-label="Fictional strategy map"></svg><div class="legend"><span><i style="background:#9a76ff"></i>Aurora</span><span><i style="background:#e36558"></i>Ember</span><span><i style="background:#3f9fba"></i>Tide</span><span><i style="background:#60a66d"></i>Vale</span><span><i style="background:#6d7180"></i>Neutral</span></div></section><aside class="game-side"><div class="card game-panel"><h3>Aurora Republic</h3><div class="game-stats"><div class="game-stat"><b id="g-gold">120</b><span>Gold</span></div><div class="game-stat"><b id="g-income">+0</b><span>Income</span></div><div class="game-stat"><b id="g-army">0</b><span>Army</span></div><div class="game-stat"><b id="g-culture">10</b><span>Culture</span></div></div></div><div class="card game-panel"><h3 id="province-name">Select a province</h3><div class="province-info" id="province-info">Choose one of your purple provinces to develop or recruit. Select an adjacent rival province to launch a campaign.</div><div class="game-actions"><button id="g-recruit">Recruit army · 20 gold</button><button id="g-develop">Develop economy · 30 gold</button><button id="g-influence">Music campaign · 15 gold</button><button id="g-attack">Attack selected province</button></div></div><div class="victory" id="game-victory"></div><button class="end-turn" id="end-turn">End turn</button><button class="new-game" id="new-game">New campaign</button><div class="card game-panel"><h3>Chronicle</h3><div class="game-log" id="game-log"></div></div><p class="game-help">Conquer 10 provinces or reach 100 cultural influence. Music campaigns weaken neighboring rivals without direct combat.</p></aside></div></section>
+    <section class="view" id="game-view">
+      <div class="dominion-heading"><div><div class="eyebrow">ATLAS ESTRATÉGICO · CAMPAÑA 1200</div><h2>Echoes of Dominion</h2><p>El territorio se conquista. Un imperio se sostiene.</p></div><span class="turn-pill" id="game-turn"></span></div>
+      <div class="game-shell">
+        <section class="card game-map-card">
+          <div class="game-toolbar"><label>Mapa<select id="map-mode"><option value="political">Político</option><option value="terrain">Terreno</option><option value="supply">Suministro de Aurora</option></select></label><div><button class="ghost" id="zoom-out" aria-label="Alejar mapa">−</button><button class="ghost" id="zoom-in" aria-label="Acercar mapa">+</button></div></div>
+          <svg class="world-map" id="world-map" viewBox="0 0 800 560" role="group" aria-label="Mapa interactivo de provincias ficticias"></svg>
+          <div class="legend"><span>● Aurora</span><span>● Ember</span><span>● Tide</span><span>● Vale</span><span>● Libres</span></div>
+          <p id="game-objective"></p><p class="game-help">Selecciona una provincia propia para dar órdenes. Después selecciona otra nación para consultar sus defensas o negociar. Atacar exige guerra declarada y frontera común. Una movilización por provincia y estación.</p>
+          <details class="game-guide"><summary>Reglas de la simulación</summary><p>Montañas: +45% defensa; bosque: +20%; cada nivel de murallas: +30%. El invierno reduce el ataque un 20%. Tropas aisladas atacan al 60% y sufren desgaste. Las provincias deben estar conectadas por territorio propio a la capital.</p><p>Los impuestos altos reducen estabilidad; el hambre y los impagos causan bajas. Una ocupación comienza con baja estabilidad y puede acabar en rebelión. Reclutar convierte 400 habitantes en soldados. Los rivales pagan sus propias tropas y respetan las treguas.</p><p>Mundo y reglas ficticios. La IA rival usa reglas estratégicas, no una red neuronal. Victoria: controlar doce provincias.</p></details>
+          <div class="card game-panel chronicle-panel"><h3>Crónica de campaña</h3><div class="game-log" id="game-log" aria-live="polite"></div></div>
+        </section>
+        <aside class="game-side">
+          <div class="card game-panel"><div class="eyebrow">TU NACIÓN</div><h3>República de Aurora</h3><div class="game-stats">
+            <div class="game-stat"><b id="g-gold"></b><span>Tesorería</span></div><div class="game-stat"><b id="g-income"></b><span>Balance / estación</span></div><div class="game-stat"><b id="g-army"></b><span>Soldados</span></div><div class="game-stat"><b id="g-food"></b><span>Alimentos</span></div><div class="game-stat"><b id="g-population"></b><span>Población civil</span></div><div class="game-stat"><b id="g-weariness"></b><span>Fatiga de guerra</span></div>
+          </div><p class="game-help" id="budget-detail"></p><label>Política fiscal<select id="g-tax"><option value="0.75">Baja · favorece estabilidad</option><option value="1">Normal · equilibrio</option><option value="1.35">Alta · riesgo de descontento</option></select></label></div>
+          <div class="card game-panel"><h3 id="province-name">Selecciona una provincia</h3><div class="province-info" id="province-info"></div><p class="game-help" id="orders-source"></p><div class="game-actions">
+            <button id="g-recruit">Reclutar 400 · 35 oro + 12 alimentos</button><button id="g-develop">Desarrollar economía · 60 oro</button><button id="g-fortify">Fortificar · 55 oro</button><button id="g-relief">Ayuda civil · 25 oro + 15 alimentos</button>
+            <label>Trasladar media fuerza a<select id="g-move-target"></select></label><button id="g-move">Trasladar tropas</button><button id="g-war">Declarar guerra a la nación seleccionada</button><button id="g-peace">Negociar tregua · 40 oro</button><button id="g-attack">Atacar provincia seleccionada</button>
+          </div></div>
+          <div id="game-status" role="status" aria-live="polite">Aurora y Ember están en guerra. Refuerza tus fronteras.</div><div class="victory" id="game-victory"></div><button class="end-turn" id="end-turn">Avanzar estación →</button><button class="new-game" id="new-game">Nueva campaña</button>
+          <div class="card game-panel" id="reset-confirm" hidden><p>¿Reemplazar esta campaña? El guardado actual se sobrescribirá.</p><button class="ghost" id="cancel-reset">Cancelar</button><button class="ghost" id="confirm-reset">Empezar de nuevo</button></div><small id="game-save"></small>
+        </aside>
+      </div>
+    </section>
     <section class="view" id="pricing-view"><div class="banner">MuseWave is free during beta. Plans are previews; no payment will be collected yet.</div><div class="section-head"><div><h2>Plans that grow with you</h2><p>Credits renew monthly. Upgrade controls are ready for hosted checkout.</p></div></div><div class="pricing" id="plans"></div></section>
   </main>
 </div>
@@ -76,23 +121,296 @@
     ["southwatch","Southwatch","68,389 238,366 262,497 105,515",165,444,"neutral",3,13],["cinderfall","Cinderfall","238,366 386,372 405,510 262,497",326,440,"ember",4,17],["moonvale","Moonvale","386,372 543,377 566,506 405,510",475,445,"vale",4,16],["azureend","Azure End","543,377 688,394 655,517 566,506",611,452,"neutral",3,14]
   ];
   const adjacency={frostmere:["redmarch","westhaven"],redmarch:["frostmere","highplain","sunspire"],highplain:["redmarch","greenreach","heartland"],greenreach:["highplain","eastbay"],westhaven:["frostmere","sunspire","goldcoast"],sunspire:["redmarch","westhaven","heartland","ironvale"],heartland:["highplain","sunspire","eastbay","silverbend"],eastbay:["greenreach","heartland","stormcape"],goldcoast:["westhaven","ironvale","southwatch"],ironvale:["sunspire","goldcoast","silverbend","cinderfall"],silverbend:["heartland","ironvale","stormcape","moonvale"],stormcape:["eastbay","silverbend","azureend"],southwatch:["goldcoast","cinderfall"],cinderfall:["ironvale","southwatch","moonvale"],moonvale:["silverbend","cinderfall","azureend"],azureend:["stormcape","moonvale"]};
-  const GAME_SAVE="musewave-echoes-v2";
-  const newGameState=()=>({version:2,turn:1,year:1200,gold:120,culture:10,source:"sunspire",target:null,over:false,log:["The Aurora Republic begins its campaign."],provinces:Object.fromEntries(provinceBlueprint.map(([id,name,points,x,y,owner,economy,army])=>[id,{id,name,points,x,y,owner,economy,army,loyalty:100}]))});
-  function loadGame(){try{const saved=JSON.parse(localStorage.getItem(GAME_SAVE));if(!saved||saved.version!==2||!saved.provinces)return newGameState();const fresh=newGameState();for(const [id,base] of Object.entries(fresh.provinces)){const old=saved.provinces[id];fresh.provinces[id]=old?{...base,...old,id,points:base.points,x:base.x,y:base.y}:base}fresh.turn=Number(saved.turn)||1;fresh.year=Number(saved.year)||1200;fresh.gold=Math.max(0,Number(saved.gold)||0);fresh.culture=Math.max(0,Number(saved.culture)||0);fresh.log=Array.isArray(saved.log)?saved.log.slice(0,20):fresh.log;fresh.over=Boolean(saved.over);fresh.source=fresh.provinces[saved.source]?.owner==="player"?saved.source:(Object.values(fresh.provinces).find(p=>p.owner==="player")?.id||null);fresh.target=fresh.provinces[saved.target]?saved.target:null;return fresh}catch{return newGameState()}}
-  function saveGame(){try{localStorage.setItem(GAME_SAVE,JSON.stringify(game))}catch{/* Private/embedded browsers may block storage; gameplay still works. */}}
-  let game=loadGame();
-  const nationName=o=>({player:"Aurora",ember:"Ember Dominion",tide:"Tide League",vale:"Vale Kingdom",neutral:"Free Province"}[o]);const owns=o=>Object.values(game.provinces).filter(p=>p.owner===o);const adjacent=(a,b)=>adjacency[a]?.includes(b);const logGame=m=>{game.log.unshift(`Turn ${game.turn}: ${m}`);game.log=game.log.slice(0,20)};
-  function renderGame(){const svg=$("#world-map"),ns="http://www.w3.org/2000/svg";svg.innerHTML="";Object.values(game.provinces).forEach(p=>{const poly=document.createElementNS(ns,"polygon");poly.setAttribute("points",p.points);poly.setAttribute("class",`province ${p.owner} ${p.id===game.source||p.id===game.target?"selected":""}`);poly.setAttribute("tabindex","0");poly.setAttribute("role","button");poly.setAttribute("aria-label",`${p.name}, ${nationName(p.owner)}, army ${p.army}`);poly.onclick=()=>selectProvince(p.id);poly.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")selectProvince(p.id)};svg.append(poly);const label=document.createElementNS(ns,"text");label.setAttribute("x",p.x);label.setAttribute("y",p.y);label.setAttribute("class","province-label");label.textContent=p.name;svg.append(label);const army=document.createElementNS(ns,"text");army.setAttribute("x",p.x);army.setAttribute("y",p.y+15);army.setAttribute("class","army-label");army.textContent=`⚔ ${p.army} · ◇ ${p.economy}`;svg.append(army)});const player=owns("player"),income=player.reduce((s,p)=>s+p.economy,0);$("#g-gold").textContent=game.gold;$("#g-income").textContent=`+${income}`;$("#g-army").textContent=player.reduce((s,p)=>s+p.army,0);$("#g-culture").textContent=game.culture;$("#game-turn").textContent=`Turn ${game.turn} · ${game.year} AE`;$("#game-log").innerHTML=game.log.map(x=>`<div>${escapeHtml(x)}</div>`).join("");const selected=game.target?game.provinces[game.target]:game.provinces[game.source];if(selected){$("#province-name").textContent=selected.name;$("#province-info").innerHTML=`Nation: <b>${nationName(selected.owner)}</b><br>Economy: ${selected.economy} · Army: ${selected.army}<br>Loyalty: ${selected.loyalty}%${game.target?`<br><span style="color:#ff9bbd">Targeted from ${game.provinces[game.source]?.name||"—"}</span>`:""}`}const source=game.provinces[game.source];$("#g-recruit").disabled=game.over||!source||source.owner!=="player"||game.gold<20;$("#g-develop").disabled=game.over||!source||source.owner!=="player"||game.gold<30;$("#g-influence").disabled=game.over||!game.target||game.gold<15;$("#g-attack").disabled=game.over||!source||!game.target||source.army<2;$("#end-turn").disabled=game.over;checkVictory();saveGame()}
-  function selectProvince(id){const p=game.provinces[id];if(game.over)return;if(p.owner==="player"){game.source=id;game.target=null}else if(game.source&&adjacent(game.source,id)){game.target=id}else{game.target=null;logGame(`${p.name} is not adjacent to the selected army.`)}renderGame()}
-  function capture(attacker,defender,owner){defender.owner=owner;defender.army=Math.max(1,attacker.army-defender.army);attacker.army=1;defender.loyalty=55;logGame(`${nationName(owner)} captured ${defender.name}.`)}
-  $("#g-recruit").onclick=()=>{const p=game.provinces[game.source];if(game.gold<20)return;game.gold-=20;p.army+=5;logGame(`Five regiments recruited in ${p.name}.`);renderGame()};
-  $("#g-develop").onclick=()=>{const p=game.provinces[game.source];if(game.gold<30)return;game.gold-=30;p.economy++;logGame(`${p.name} expanded its economy.`);renderGame()};
-  $("#g-influence").onclick=()=>{const p=game.provinces[game.target];if(!p||game.gold<15)return;game.gold-=15;game.culture+=8;p.loyalty-=25;logGame(`Aurora music reached ${p.name}; loyalty fell to ${Math.max(0,p.loyalty)}%.`);if(p.loyalty<=0){p.owner="player";p.army=Math.max(1,Math.floor(p.army/2));p.loyalty=60;game.target=null;logGame(`${p.name} joined Aurora through cultural influence.`)}renderGame()};
-  $("#g-attack").onclick=()=>{const a=game.provinces[game.source],d=game.provinces[game.target];if(!a||!d||a.army<2)return;const attack=a.army*(.75+Math.random()*.5),defense=d.army*(.85+Math.random()*.5);if(attack>defense)capture(a,d,"player");else{a.army=Math.max(1,Math.floor(a.army*.45));d.army=Math.max(1,Math.floor(d.army*.7));logGame(`The campaign against ${d.name} failed.`)}game.target=null;renderGame()};
-  function aiTurn(owner){const lands=owns(owner);lands.forEach(p=>p.army+=1);const candidates=[];lands.forEach(a=>(adjacency[a.id]||[]).forEach(id=>{const d=game.provinces[id];if(d.owner!==owner)candidates.push({a,d,score:a.army-d.army})}));candidates.sort((a,b)=>b.score-a.score);const move=candidates[0];if(move&&move.a.army>move.d.army+2&&Math.random()>.25){const attack=move.a.army*(.7+Math.random()*.45),defense=move.d.army*(.8+Math.random()*.45);if(attack>defense)capture(move.a,move.d,owner);else{move.a.army=Math.max(1,Math.floor(move.a.army*.55));move.d.army=Math.max(1,Math.floor(move.d.army*.75))}}}
-  $("#end-turn").onclick=()=>{game.gold+=owns("player").reduce((s,p)=>s+p.economy,0);["ember","tide","vale"].forEach(aiTurn);Object.values(game.provinces).forEach(p=>{if(p.owner!=="neutral"&&Math.random()>.65)p.army++});game.turn++;game.year+=2;game.source=owns("player")[0]?.id||null;game.target=null;logGame("A new strategic season begins.");renderGame()};
-  function checkVictory(){const count=owns("player").length,box=$("#game-victory");if(count>=10||game.culture>=100){game.over=true;box.textContent=count>=10?"Victory: Aurora controls the continent.":"Cultural victory: Aurora's music shapes the age.";box.classList.add("show")}else if(!count){game.over=true;box.textContent="Defeat: the Aurora Republic has fallen.";box.classList.add("show")}else box.classList.remove("show")}
-  $("#new-game").onclick=()=>{if(confirm("Start a new campaign?")){game=newGameState();renderGame()}};renderGame();
+  // STRATEGY_ENGINE_START
+  function createStrategyEngine(blueprint, borders) {
+    const names={player:"República de Aurora",ember:"Dominio de Ember",tide:"Liga de Tide",vale:"Reino de Vale",neutral:"Provincias libres"};
+    const terrainTypes=["montaña","bosque","llanura","bosque","costa","llanura","llanura","costa","costa","montaña","bosque","costa","llanura","montaña","bosque","costa"];
+    const defense={montaña:1.45,bosque:1.2,llanura:1,costa:1.05};
+    const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+    const lands=(s,owner)=>Object.values(s.provinces).filter(p=>p.owner===owner);
+    const key=(a,b)=>[a,b].sort().join(":");
+    const relation=(s,a,b)=>a===b?"propia":s.wars[key(a,b)]?"guerra":"paz";
+    function random(s){s.seed=(Math.imul(1664525,s.seed)+1013904223)>>>0;return s.seed/4294967296}
+    function log(s,message){s.log.unshift(message);s.log=s.log.slice(0,35)}
+    function fresh(){
+      const provinces=Object.fromEntries(blueprint.map(([id,name,points,x,y,owner,economy,army],i)=>[id,{id,name,points,x,y,owner,economy,army,population:18000+economy*7000,terrain:terrainTypes[i],fort:i%5===0?1:0,stability:85,morale:85,acted:false}]));
+      return {version:3,seed:1729,turn:1,over:false,source:"sunspire",target:null,provinces,
+        nations:Object.fromEntries(["player","ember","tide","vale"].map(n=>[n,{gold:180,food:200,tax:1,warWeariness:0}])),
+        wars:{"ember:player":true},truces:{},log:["Primavera de 1200. Ember está en guerra con Aurora. Tide y Vale mantienen la paz."]};
+    }
+    function supply(s,owner){
+      const own=lands(s,owner),capital=own.find(p=>p.id===({player:"sunspire",ember:"redmarch",tide:"eastbay",vale:"greenreach"}[owner]))||own.slice().sort((a,b)=>b.population-a.population)[0];
+      const connected=new Set(capital?[capital.id]:[]),queue=capital?[capital.id]:[];
+      while(queue.length){for(const id of borders[queue.shift()]||[])if(s.provinces[id]?.owner===owner&&!connected.has(id)){connected.add(id);queue.push(id)}}
+      return connected;
+    }
+    function budget(s,owner){
+      const own=lands(s,owner),n=s.nations[owner],connected=supply(s,owner),winter=s.turn%4===0;
+      return {income:Math.floor(own.reduce((v,p)=>v+p.economy*6*n.tax*(p.stability/100)*(connected.has(p.id)?1:.45),0)),
+        upkeep:Math.ceil(own.reduce((v,p)=>v+p.army*.65+p.fort*2,0)),
+        harvest:Math.floor(own.reduce((v,p)=>v+p.economy*(p.terrain==="llanura"?9:p.terrain==="montaña"?3:6),0)*(winter?.35:1)),
+        consumption:Math.ceil(own.reduce((v,p)=>v+p.army*.7+p.population/12000,0))};
+    }
+    function forecast(s,a,d){
+      const supplied=supply(s,a.owner).has(a.id),winter=s.turn%4===0;
+      const attack=Math.max(0,a.army-1)*(a.morale/100)*(supplied?1:.6)*(winter?.8:1);
+      const defend=d.army*(d.morale/100)*defense[d.terrain]*(1+d.fort*.3);
+      return {attack,defend,ratio:attack/Math.max(1,defend),supplied};
+    }
+    function finish(s){
+      const own=lands(s,"player");
+      if(!own.length){s.over=true;s.result="Derrota: Aurora perdió todas sus provincias."}
+      else if(own.length>=12){s.over=true;s.result="Victoria territorial: Aurora controla doce provincias."}
+    }
+    function action(s,type,args={},actor="player"){
+      const fail=message=>({ok:false,message});
+      if(s.over)return fail("La campaña ha terminado.");
+      const n=s.nations[actor],p=s.provinces[args.source||s.source],target=s.provinces[args.target||s.target];
+      if(!n)return fail("Nación inválida.");
+      if(type==="tax"){
+        if(![.75,1,1.35].includes(Number(args.value)))return fail("Impuesto inválido.");
+        n.tax=Number(args.value);return {ok:true};
+      }
+      if(type==="war"||type==="peace"){
+        if(!target||target.owner===actor)return fail("Selecciona una provincia de otra nación.");
+        const k=key(actor,target.owner);
+        if(type==="war"){
+          if(s.wars[k])return fail("Ya existe una guerra.");
+          if((s.truces[k]||0)>s.turn)return fail("La tregua sigue vigente.");
+          s.wars[k]=true;n.warWeariness=clamp(n.warWeariness+5,0,80);
+          log(s,names[actor]+" declara la guerra a "+names[target.owner]+".");
+        }else{
+          if(!s.wars[k])return fail("Ya existe paz.");
+          if(n.gold<40)return fail("Necesitas 40 de oro para negociar.");
+          n.gold-=40;delete s.wars[k];s.truces[k]=s.turn+5;
+          log(s,"Armisticio entre "+names[actor]+" y "+names[target.owner]+": cinco estaciones.");
+        }
+        return {ok:true};
+      }
+      if(!p||p.owner!==actor)return fail("Selecciona una provincia propia.");
+      if(type==="recruit"){
+        if(p.acted)return fail("Esta provincia ya movilizó sus tropas este turno.");
+        if(n.gold<35||n.food<12||p.population<12000)return fail("Requiere 35 oro, 12 alimentos y población disponible.");
+        if(!supply(s,actor).has(p.id))return fail("La provincia está aislada: reconecta su suministro.");
+        n.gold-=35;n.food-=12;p.army+=4;p.population-=400;p.morale=clamp(p.morale-3,20,100);p.acted=true;
+        log(s,"Movilizados 400 soldados en "+p.name+".");
+      }else if(type==="develop"){
+        if(n.gold<60||p.economy>=10)return fail("Requiere 60 oro; economía máxima: 10.");
+        n.gold-=60;p.economy++;log(s,"Mejoradas las granjas y rutas comerciales de "+p.name+".");
+      }else if(type==="fortify"){
+        if(n.gold<55||p.fort>=3)return fail("Requiere 55 oro; fortificación máxima: 3.");
+        n.gold-=55;p.fort++;log(s,"Fortificaciones de "+p.name+" elevadas a nivel "+p.fort+".");
+      }else if(type==="relief"){
+        if(n.gold<25||n.food<15)return fail("Requiere 25 oro y 15 alimentos.");
+        n.gold-=25;n.food-=15;p.stability=clamp(p.stability+15,0,100);p.morale=clamp(p.morale+8,20,100);
+      }else if(type==="move"||type==="attack"){
+        if(!target||!borders[p.id]?.includes(target.id))return fail("El destino debe compartir frontera.");
+        if(p.acted||p.army<2)return fail("No hay tropas disponibles para movilizar.");
+        if(type==="move"){
+          if(target.owner!==actor)return fail("El traslado requiere un destino propio.");
+          const amount=Math.max(1,Math.floor((p.army-1)/2));p.army-=amount;target.army+=amount;target.acted=true;p.acted=true;
+          log(s,amount*100+" soldados trasladados de "+p.name+" a "+target.name+".");
+        }else{
+          if(target.owner===actor||relation(s,actor,target.owner)!=="guerra")return fail("Debes declarar la guerra antes de atacar.");
+          const f=forecast(s,p,target),a=p.army-1,old=target.army;
+          const win=f.attack*(.9+random(s)*.2)>f.defend*(.9+random(s)*.2);
+          p.acted=true;n.warWeariness=clamp(n.warWeariness+4,0,80);
+          if(win){
+            const loss=Math.min(a-1,Math.max(1,Math.ceil(old*.45*defense[target.terrain])));
+            p.army=1;target.army=Math.max(1,a-loss);target.owner=actor;target.stability=35;target.morale=Math.max(40,p.morale-15);target.acted=true;target.fort=Math.max(0,target.fort-1);
+            log(s,target.name+" ocupada por "+names[actor]+". Bajas atacantes: "+loss*100+"; guarnición defensora dispersada.");
+          }else{
+            const loss=Math.min(p.army-1,Math.max(1,Math.ceil(a*.35)));
+            p.army-=loss;target.army=Math.max(1,old-Math.ceil(old*.15));p.morale=clamp(p.morale-15,20,100);
+            log(s,"Asalto rechazado en "+target.name+". Bajas atacantes: "+loss*100+".");
+          }
+          target.population=Math.max(5000,Math.floor(target.population*.99));
+        }
+      }else return fail("Orden desconocida.");
+      finish(s);return {ok:true};
+    }
+    function nextTurn(s){
+      if(s.over)return;
+      for(const owner of Object.keys(s.nations)){
+        const n=s.nations[owner],b=budget(s,owner),connected=supply(s,owner);
+        const insolvent=n.gold+b.income<b.upkeep,starving=n.food+b.harvest<b.consumption;
+        n.gold=Math.max(0,n.gold+b.income-b.upkeep);n.food=Math.max(0,n.food+b.harvest-b.consumption);
+        const atWar=Object.keys(s.wars).some(k=>k.split(":").includes(owner));
+        n.warWeariness=clamp(n.warWeariness+(atWar?1:-4),0,80);
+        for(const p of lands(s,owner)){
+          const isolated=!connected.has(p.id),attrition=isolated||starving||insolvent;
+          if(attrition){const lost=Math.max(1,Math.ceil(p.army*.08));p.army=Math.max(1,p.army-lost);p.morale=clamp(p.morale-10,20,100);
+            if(owner==="player")log(s,p.name+": desgaste por "+(starving?"hambre":insolvent?"impagos":"aislamiento")+".");
+          }else p.morale=clamp(p.morale+5,20,100);
+          p.stability=clamp(p.stability+(n.tax>1?-5:n.tax<1?4:2)-n.warWeariness*.04-(starving?12:0),0,100);
+          p.population=Math.max(5000,Math.round(p.population*(starving?.985:1.003)));
+          p.acted=false;
+          if(p.stability<20&&random(s)<.2){p.owner="neutral";p.stability=50;log(s,"Rebelión: "+p.name+" se independiza.");}
+        }
+      }
+      s.turn++;
+      for(const owner of ["ember","tide","vale"]){
+        const own=lands(s,owner);if(!own.length)continue;
+        const frontier=own.filter(p=>(borders[p.id]||[]).some(id=>relation(s,owner,s.provinces[id].owner)==="guerra"));
+        const options=frontier.flatMap(p=>(borders[p.id]||[]).map(id=>({p,d:s.provinces[id]}))).filter(({p,d})=>relation(s,owner,d.owner)==="guerra"&&forecast(s,p,d).ratio>1.2).sort((a,b)=>forecast(s,b.p,b.d).ratio-forecast(s,a.p,a.d).ratio);
+        if(options.length)action(s,"attack",{source:options[0].p.id,target:options[0].d.id},owner);
+        else if(frontier.length)action(s,"recruit",{source:frontier.slice().sort((a,b)=>a.army-b.army)[0].id},owner);
+        else action(s,"develop",{source:own.slice().sort((a,b)=>a.economy-b.economy)[0].id},owner);
+        if(s.nations[owner].warWeariness>35){
+          const enemy=Object.values(s.provinces).find(p=>relation(s,owner,p.owner)==="guerra");
+          if(enemy)action(s,"peace",{target:enemy.id},owner);
+        }
+      }
+      finish(s);
+      if(s.provinces[s.source]?.owner!=="player")s.source=lands(s,"player")[0]?.id||null;
+      s.target=null;
+      log(s,["Primavera","Verano","Otoño","Invierno"][(s.turn-1)%4]+" de "+(1200+Math.floor((s.turn-1)/4))+".");
+    }
+    function restore(raw){
+      if(!raw||raw.version!==3||!Number.isSafeInteger(raw.turn)||raw.turn<1||!Number.isInteger(raw.seed)||!raw.nations||!raw.provinces||!raw.wars||!raw.truces)throw Error("Partida incompatible.");
+      const clean=fresh();
+      for(const owner of Object.keys(clean.nations)){
+        const n=raw.nations[owner];if(!n||![.75,1,1.35].includes(n.tax)||!["gold","food","warWeariness"].every(k=>Number.isFinite(n[k])&&n[k]>=0))throw Error("Economía inválida.");
+        clean.nations[owner]={gold:n.gold,food:n.food,tax:n.tax,warWeariness:clamp(n.warWeariness,0,80)};
+      }
+      for(const id of Object.keys(clean.provinces)){
+        const p=raw.provinces[id];if(!p||!Object.hasOwn(names,p.owner)||!["economy","army","population","fort","stability","morale"].every(k=>Number.isFinite(p[k])&&p[k]>=0))throw Error("Provincia inválida.");
+        Object.assign(clean.provinces[id],{owner:p.owner,economy:clamp(Math.floor(p.economy),1,10),army:clamp(Math.floor(p.army),1,100000),population:clamp(Math.floor(p.population),5000,10000000),fort:clamp(Math.floor(p.fort),0,3),stability:clamp(p.stability,0,100),morale:clamp(p.morale,20,100),acted:!!p.acted});
+      }
+      clean.turn=raw.turn;clean.seed=raw.seed>>>0;clean.log=Array.isArray(raw.log)?raw.log.filter(x=>typeof x==="string").slice(0,35):[];
+      for(const a of Object.keys(names))for(const b of Object.keys(names))if(a!==b){
+        const k=key(a,b);delete clean.wars[k];if(raw.wars[k]===true)clean.wars[k]=true;
+        if(Number.isSafeInteger(raw.truces[k])&&raw.truces[k]>=0)clean.truces[k]=raw.truces[k];
+      }
+      clean.source=clean.provinces[raw.source]?.owner==="player"?raw.source:lands(clean,"player")[0]?.id||null;
+      clean.target=clean.provinces[raw.target]&&raw.target!==clean.source?raw.target:null;finish(clean);return clean;
+    }
+    return {fresh,restore,action,nextTurn,lands,budget,supply,forecast,relation,names,defense};
+  }
+  // STRATEGY_ENGINE_END
+
+  const strategy=createStrategyEngine(provinceBlueprint,adjacency);
+  const GAME_SAVE="musewave-dominion-v3";
+  let game=strategy.fresh(),mapMode="political",zoom=1,saveNotice="Guardado automático en este navegador.";
+  try{const saved=localStorage.getItem(GAME_SAVE);if(saved)game=strategy.restore(JSON.parse(saved));}
+  catch{saveNotice="No se pudo leer la partida. Se inició una campaña temporal sin borrar el guardado anterior.";}
+  let allowSave=!saveNotice.startsWith("No se pudo");
+  function saveGame(){
+    if(!allowSave)return;
+    try{localStorage.setItem(GAME_SAVE,JSON.stringify(game));}
+    catch{saveNotice="Guardado no disponible. La partida funciona, pero se perderá al cerrar esta página.";}
+  }
+  const number=n=>Math.round(n).toLocaleString("es");
+  const colors={player:"#8d79bc",ember:"#b96b57",tide:"#568c9f",vale:"#70915d",neutral:"#aaa086"};
+  const ground={montaña:"#929083",bosque:"#56765e",llanura:"#ada577",costa:"#8b9e86"};
+  function mapElement(tag,attributes={},text){
+    const el=document.createElementNS("http://www.w3.org/2000/svg",tag);
+    for(const [k,v] of Object.entries(attributes))el.setAttribute(k,v);
+    if(text!==undefined)el.textContent=text;return el;
+  }
+  function atlasPoints(points){
+    const corners=points.split(' ').map(s=>s.split(',').map(Number)),out=[];
+    for(let i=0;i<corners.length;i++){
+      const from=corners[i],to=corners[(i+1)%corners.length];
+      const reverse=from[0]>to[0]||(from[0]===to[0]&&from[1]>to[1]);
+      const a=reverse?to:from,b=reverse?from:to,dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy),edge=[a];
+      for(let step=1;step<5;step++){
+        const t=step/5,offset=Math.sin(a[0]*.13+a[1]*.19+b[0]*.07+step*2.7)*6;
+        edge.push([a[0]+dx*t-dy/length*offset,a[1]+dy*t+dx/length*offset]);
+      }
+      edge.push(b);if(reverse)edge.reverse();out.push(...edge.slice(0,-1));
+    }
+    return out.map(p=>p.join(',')).join(' ');
+  }
+  function renderGame(){
+    const svg=$("#world-map");svg.replaceChildren();
+    const source=game.provinces[game.source],selected=game.provinces[game.target]||source;
+    const w=800/zoom,h=560/zoom,cx=selected?.x||400,cy=selected?.y||280;
+    svg.setAttribute("viewBox",`${Math.max(0,Math.min(800-w,cx-w/2))} ${Math.max(0,Math.min(560-h,cy-h/2))} ${w} ${h}`);
+    svg.append(mapElement("rect",{width:800,height:560,fill:"#162c35"}));
+    for(let y=20;y<560;y+=35)svg.append(mapElement("path",{d:`M0 ${y} Q200 ${y-12} 400 ${y} T800 ${y}`,stroke:"#87a4a0","stroke-opacity":".1",fill:"none"}));
+    svg.append(mapElement("text",{x:680,y:37,fill:"#adc6be","font-size":12,"letter-spacing":3},"N ↑"));
+    const connected=strategy.supply(game,"player");
+    Object.values(game.provinces).forEach(p=>{
+      let fill=colors[p.owner];if(mapMode==="terrain")fill=ground[p.terrain];
+      if(mapMode==="supply")fill=p.owner==="player"?(connected.has(p.id)?"#649e88":"#bb765c"):"#62666a";
+      const outline=atlasPoints(p.points);
+      const poly=mapElement("polygon",{points:outline,fill,stroke:p.id===selected?.id?"#ffdc8b":"#253b39","stroke-width":p.id===selected?.id?4:2,tabindex:0,role:"button","aria-label":`${p.name}, ${strategy.names[p.owner]}, ${number(p.army*100)} soldados, ${p.terrain}`});
+      poly.append(mapElement("title",{},`${p.name} · ${p.terrain} · estabilidad ${Math.round(p.stability)}%`));
+      poly.onclick=()=>selectProvince(p.id);poly.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selectProvince(p.id)}};
+      svg.append(poly);
+      const clip=mapElement('clipPath',{id:'terrain-'+p.id});clip.append(mapElement('polygon',{points:outline}));svg.append(clip);
+      const relief=mapElement('g',{'clip-path':'url(#terrain-'+p.id+')','pointer-events':'none',opacity:'.22'});
+      for(let row=0;row<5;row++){
+        const y=p.y-50+row*23;
+        relief.append(mapElement('path',{d:`M${p.x-90} ${y} Q${p.x-40} ${y-18} ${p.x} ${y} T${p.x+95} ${y+3}`,stroke:'#eff0cd','stroke-width':'.8',fill:'none'}));
+      }
+      if(p.terrain==='montaña')for(let i=0;i<4;i++){
+        const x=p.x-45+i*25,y=p.y-27-Math.sin(i)*9;
+        relief.append(mapElement('path',{d:`M${x-14} ${y+12} L${x} ${y-15} L${x+15} ${y+12} Z`,fill:'#152d30',stroke:'#e1ddc0','stroke-width':1}));
+      }
+      svg.append(relief);
+      const marker=p.terrain==="montaña"?"▲ ▲":p.terrain==="bosque"?"♠ ♠":p.terrain==="costa"?"≈ ≈":"· · ·";
+      svg.append(mapElement("text",{x:p.x,y:p.y-20,"text-anchor":"middle",fill:"#182c2b","fill-opacity":".5","font-size":17,"pointer-events":"none"},marker));
+      svg.append(mapElement("text",{x:p.x,y:p.y,"text-anchor":"middle",fill:"#fff5dd","font-size":11,"font-weight":700,"pointer-events":"none"},p.name));
+      svg.append(mapElement("text",{x:p.x,y:p.y+16,"text-anchor":"middle",fill:"#fff5dd","font-size":10,"pointer-events":"none"},`${p.acted?"◷":"⚑"} ${number(p.army*100)}${p.fort?" · ▣ "+p.fort:""}`));
+    });
+    if(source&&game.target&&adjacency[source.id]?.includes(game.target)){
+      const t=game.provinces[game.target];
+      svg.append(mapElement("path",{d:`M${source.x} ${source.y+24} L${t.x} ${t.y+24}`,stroke:"#ffe0a0","stroke-width":2,"stroke-dasharray":"5 5","pointer-events":"none"}));
+    }
+    const own=strategy.lands(game,"player"),n=game.nations.player,b=strategy.budget(game,"player"),net=b.income-b.upkeep;
+    $("#g-gold").textContent=number(n.gold);$("#g-income").textContent=(net>=0?"+":"")+number(net);
+    $("#g-army").textContent=number(own.reduce((v,p)=>v+p.army*100,0));$("#g-food").textContent=number(n.food);
+    $("#g-population").textContent=number(own.reduce((v,p)=>v+p.population,0));$("#g-weariness").textContent=Math.round(n.warWeariness)+"%";
+    $("#game-turn").textContent=["Primavera","Verano","Otoño","Invierno"][(game.turn-1)%4]+" · "+(1200+Math.floor((game.turn-1)/4));
+    $("#budget-detail").textContent=`Por estación: ingresos ${b.income} − gastos ${b.upkeep} oro. Cosecha ${b.harvest} − consumo ${b.consumption} alimentos. El invierno reduce las cosechas un 65%.`;
+    $("#g-tax").value=String(n.tax);
+    $("#game-log").replaceChildren(...game.log.map(message=>{const row=document.createElement("div");row.textContent=message;return row}));
+    $("#province-name").textContent=selected?.name||"Sin territorio";
+    $("#orders-source").textContent=source?"Órdenes propias desde "+source.name+(source.acted?" · tropas ya movilizadas":" · tropas disponibles"):"Sin provincia propia seleccionada";
+    const info=$("#province-info");info.replaceChildren();
+    if(selected){
+      const lines=[strategy.names[selected.owner]+" · "+selected.terrain,`Población: ${number(selected.population)} · Economía: ${selected.economy}/10`,`Guarnición: ${number(selected.army*100)} · Moral: ${Math.round(selected.morale)}%`,`Estabilidad: ${Math.round(selected.stability)}% · Murallas: ${selected.fort}/3`,
+        selected.owner==="player"?(connected.has(selected.id)?"Suministro conectado":"Suministro cortado"):("Relación: "+strategy.relation(game,"player",selected.owner))];
+      if(game.target&&source){const f=strategy.forecast(game,source,selected);lines.push(`Desde ${source.name}: ${f.ratio>1.2?"ventaja atacante":f.ratio<.85?"ventaja defensora":"fuerzas parejas"}. Terreno defensivo ×${strategy.defense[selected.terrain]}.`)}
+      for(const line of lines){const row=document.createElement("div");row.textContent=line;info.append(row)}
+    }
+    const blocked=game.over||!source||source.owner!=="player";
+    $("#g-recruit").disabled=blocked||source.acted||n.gold<35||n.food<12||source.population<12000||!connected.has(source.id);
+    $("#g-develop").disabled=blocked||n.gold<60||source.economy>=10;
+    $("#g-fortify").disabled=blocked||n.gold<55||source.fort>=3;
+    $("#g-relief").disabled=blocked||n.gold<25||n.food<15;
+    const target=game.provinces[game.target],war=target&&strategy.relation(game,"player",target.owner)==="guerra";
+    $("#g-attack").disabled=blocked||!target||!war||source.acted||source.army<2||!adjacency[source.id]?.includes(target.id);
+    $("#g-war").disabled=game.over||!target||war||(game.truces[["player",target?.owner].sort().join(":")]||0)>game.turn;
+    $("#g-peace").disabled=game.over||!war||n.gold<40;
+    const move=$("#g-move-target");move.replaceChildren();
+    for(const id of adjacency[source?.id]||[]){const p=game.provinces[id];if(p.owner==="player"){const opt=document.createElement("option");opt.value=id;opt.textContent=p.name;move.append(opt)}}
+    $("#g-move").disabled=blocked||source.acted||source.army<2||!move.options.length;
+    $("#end-turn").disabled=game.over;$("#g-tax").disabled=game.over;
+    $("#game-victory").classList.toggle("show",game.over);$("#game-victory").textContent=game.result||"";
+    $("#game-objective").textContent=`Control territorial ${own.length}/12 · Cada regimiento representa 100 soldados.`;
+    saveGame();$("#game-save").textContent=saveNotice;
+  }
+  function selectProvince(id){
+    const p=game.provinces[id];if(p.owner==="player"){game.source=id;game.target=null}else game.target=id;
+    renderGame();
+  }
+  function issue(type,args={}){
+    const result=strategy.action(game,type,args);if(result.ok&&game.provinces[game.target]?.owner==="player")game.target=null;$("#game-status").textContent=result.ok?"Orden ejecutada.":result.message;renderGame();
+  }
+  for(const [id,type] of Object.entries({"g-recruit":"recruit","g-develop":"develop","g-fortify":"fortify","g-relief":"relief","g-attack":"attack","g-war":"war","g-peace":"peace"}))$("#"+id).onclick=()=>issue(type);
+  $("#g-tax").onchange=e=>issue("tax",{value:Number(e.target.value)});
+  $("#g-move").onclick=()=>issue("move",{target:$("#g-move-target").value});
+  $("#end-turn").onclick=()=>{strategy.nextTurn(game);$("#game-status").textContent="Estación resuelta: economía, suministro y decisiones rivales.";renderGame()};
+  $("#map-mode").onchange=e=>{mapMode=e.target.value;renderGame()};
+  $("#zoom-in").onclick=()=>{zoom=Math.min(2.2,zoom+.3);renderGame()};
+  $("#zoom-out").onclick=()=>{zoom=Math.max(1,zoom-.3);renderGame()};
+  $("#new-game").onclick=()=>{$("#reset-confirm").hidden=false};
+  $("#cancel-reset").onclick=()=>{$("#reset-confirm").hidden=true};
+  $("#confirm-reset").onclick=()=>{game=strategy.fresh();allowSave=true;saveNotice="Guardado automático en este navegador.";$("#reset-confirm").hidden=true;$("#game-status").textContent="Nueva campaña iniciada.";renderGame()};
+  renderGame();
   call("get_musewave_account").catch(err=>{$("#status").textContent="The studio could not connect. Refresh and try again.";console.error(err)});cost();
 </script>
 </body></html>
