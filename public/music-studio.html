@@ -51,6 +51,20 @@
     #history-tech{font-size:13px;line-height:1.6}#history-region-info{margin-top:14px}#game-view a{color:#b3d7e4}
     #game-view #history-log>div{padding:8px 0;border-bottom:1px solid #344540}
     #game-view .game-side>div:nth-child(2){grid-row:auto}
+    .history-campaign{margin-bottom:16px;border-bottom:1px solid #354640}.history-campaign>summary{padding:14px 0;cursor:pointer;color:#cec5ac;font-size:13px}.history-campaign .history-setup{margin-top:12px}
+    #game-view .history-brief{display:grid;grid-template-columns:1.15fr 1fr;gap:26px;margin-bottom:16px;padding:22px;background:linear-gradient(110deg,#263a35,#172627);border-color:#4e6250}
+    .history-brief h3{font:500 23px Georgia,serif;margin:9px 0}.history-brief p{font-size:13px;line-height:1.7;color:#c8d2c8}.history-brief button{margin-top:8px}.history-brief>div+div{border-left:1px solid #4c6055;padding-left:26px}
+    .history-tutorial{margin-bottom:20px}.history-tutorial li{margin-bottom:10px;color:#c5cfc5;font-size:13px;line-height:1.7}.history-tutorial ol{padding-left:22px}
+    .history-action-help{display:block;font-size:11px;line-height:1.6;color:#b6c9bd;margin:0 0 8px;padding:0 3px}.history-action-help.unavailable{color:#d4b58d}
+    #game-view button:focus-visible,#game-view summary:focus-visible,#game-view select:focus-visible{outline:2px solid #e8cf8d;outline-offset:3px}
+    #game-view h4{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#b2c6b9;margin:18px 0 8px}.history-ledger h3{font:500 22px Georgia,serif;margin:24px 0 8px}
+    .history-table-scroll{overflow-x:auto}.history-ledger table{width:100%;border-collapse:collapse;font-size:12px}.history-ledger th{text-align:left;color:#aabfb2;font-weight:500;padding:10px 8px;border-bottom:1px solid #4a5b52}.history-ledger td{padding:10px 8px;border-bottom:1px solid #34473f;white-space:nowrap}
+    #game-view .history-row-button{color:#eee3c8;border:0;background:transparent;text-align:left;padding:6px 0;cursor:pointer;text-decoration:underline;text-underline-offset:4px;font-size:12px}
+    .history-progress{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:18px 0}.history-progress label{font-size:11px;color:#c6cebd}.history-progress progress{display:block;width:100%;height:7px;margin-top:10px;accent-color:#c3ad74}
+    .history-directory{display:grid;gap:7px;max-height:300px;overflow-y:auto;margin-top:12px}.history-diplomatic-row{padding:12px;text-align:left;background:#172b29;border:1px solid #42584b;color:#d9e2d7;border-radius:8px;font-size:12px;cursor:pointer}.history-diplomatic-row:hover{background:#294438}
+    .history-roadmap{padding-left:20px;font-size:11px;line-height:1.8;color:#a6b5b0}.history-roadmap li{padding:5px}.history-roadmap .unlocked{color:#d1dcb4}
+    #history-status{margin:12px 0 18px;background:#182522;min-height:46px}.history-center:hover{filter:brightness(1.3)}
+    @media(max-width:700px){#game-view .history-brief{grid-template-columns:1fr;padding:16px;gap:12px}.history-brief>div+div{padding-left:0;border-left:0;border-top:1px solid #4c6055;padding-top:14px}.history-progress{gap:12px}#game-view .game-actions button{min-height:46px}}
     @media(max-width:700px){.history-setup{grid-template-columns:1fr}.history-clock{text-align:left}.game-toolbar{flex-wrap:wrap}.history-map-tools{gap:4px}}
 
   </style>
@@ -76,8 +90,11 @@
     <section class="view" id="learning-view"><div class="section-head"><div><h2>MuseWave Intelligence</h2><p>A private preference network that improves from explicit feedback.</p></div></div><div class="learning-grid"><article class="card learn-card"><div class="brain">◎</div><h3>Learning you control</h3><p>MuseWave learns only from tracks you rate after opting in. It cannot read unrelated conversations, scrape the web, rewrite its code, or deploy itself.</p><label class="toggle"><span>Personalized learning</span><input id="learning-consent" type="checkbox"></label></article><article class="card learn-card"><div class="eyebrow">Model status</div><h3 id="model-state">Waiting for consent</h3><p id="model-copy">Enable learning and rate at least 10 tracks.</p><div class="learn-stats"><div class="learn-stat"><b id="feedback-count">0</b><span>Ratings</span></div><div class="learn-stat"><b id="model-confidence">0%</b><span>Confidence</span></div><div class="learn-stat"><b id="model-version">—</b><span>Model</span></div></div><p>Neural architecture: 23 music features → 32 neurons → 16 neurons → preference score. Models require evaluation before controlled promotion.</p></article></div></section>
     <section class="view" id="game-view" lang="en">
       <div class="dominion-heading"><div><div class="eyebrow">MUSEWAVE · HUMAN HISTORY</div><h2>Earth through the ages</h2><p id="history-active-scenario"></p></div><div class="history-clock"><b id="history-date"></b><span id="history-era-now"></span></div></div>
-      <div class="card history-setup"><div><span class="eyebrow">CHOOSE YOUR STARTING POINT</span><h3>Ten eras. One world.</h3><p>Choose a historical opening, then write an alternate history.</p></div><label>Historical scenario<select id="history-scenario"></select></label><label>Playable faction<select id="history-faction"></select></label><button class="end-turn" id="history-start">Start historical campaign</button><p id="history-setup-note"></p>
-      <div id="history-confirm-box" hidden><p id="history-confirm-note"></p><button class="ghost" id="history-cancel">Keep current campaign</button><button class="end-turn" id="history-confirm">Confirm new campaign</button></div></div>
+      <details class="history-campaign"><summary>Choose an era or start a new campaign</summary><div class="card history-setup"><div><span class="eyebrow">CHOOSE YOUR STARTING POINT</span><h3>Ten eras. One world.</h3><p>Your current campaign is already playable. Use this panel to start somewhere else.</p></div><label>Historical scenario<select id="history-scenario"></select></label><label>Playable faction<select id="history-faction"></select></label><button class="end-turn" id="history-start">Start historical campaign</button><p id="history-setup-note"></p>
+      <div id="history-confirm-box" hidden><p id="history-confirm-note"></p><button class="ghost" id="history-cancel">Keep current campaign</button><button class="end-turn" id="history-confirm">Confirm new campaign</button></div></div></details>
+      <section class="history-brief card" aria-label="Turn guidance"><div><span class="eyebrow">YOUR NEXT MOVE</span><h3 id="history-advice-title"></h3><p id="history-advice"></p><button class="ghost" id="history-advice-action">Inspect priority center</button></div><div><span class="eyebrow">BEFORE YOU ADVANCE</span><p id="history-turn-preview"></p><p class="game-help">Choose a center → issue orders → advance time. Recruiting, moving or attacking uses that center’s mobilization for this turn.</p><button class="end-turn" id="history-next-top"></button></div></section>
+      <details class="game-guide history-tutorial"><summary>How to play · a quick field guide</summary><ol><li><strong>Build a stable economy.</strong> Select one of your centers. Infrastructure increases income and food production. Lower taxes improve stability.</li><li><strong>Choose diplomacy or expansion.</strong> Inspect a foreign center. Trade earns 8 treasury per active partner each turn. War enables attacks along an unlocked direct route.</li><li><strong>Watch your supplies.</strong> Isolated forces suffer attrition. A center must connect through your holdings to your capital to recruit.</li><li><strong>Advance deliberately.</strong> Rivals act when you end a turn. Years advance by different amounts in each era. Research unlocks only when its era begins.</li><li><strong>Win your way.</strong> Control 27 centers, or reach technology 10 and 600 prosperity. Progress reflects an alternate history after your chosen opening.</li></ol></details>
+      <div id="history-status" role="status" aria-live="polite">Your campaign is ready. Select a friendly center to build, or inspect another faction to negotiate.</div>
       <div class="game-shell">
         <section class="card game-map-card">
           <div class="game-toolbar"><label>Map layer<select id="history-map-mode"><option value="control">Faction control</option><option value="terrain">Regional terrain</option><option value="supply">Your supply network</option></select></label><div class="history-map-tools"><button class="ghost" id="history-pan-west" aria-label="Pan west">←</button><button class="ghost" id="history-pan-north" aria-label="Pan north">↑</button><button class="ghost" id="history-pan-south" aria-label="Pan south">↓</button><button class="ghost" id="history-pan-east" aria-label="Pan east">→</button><button class="ghost" id="history-zoom-out" aria-label="Zoom out">−</button><button class="ghost" id="history-zoom-in" aria-label="Zoom in">+</button><button class="ghost" id="history-home">World</button></div></div>
@@ -85,6 +102,9 @@
           <div class="legend" id="history-legend"></div>
           <p class="history-map-note">REAL EARTH · 44 STRATEGIC CENTERS · Markers show regional control, not exact national borders. Land is never assumed uninhabited. Coastlines use modern geography.</p>
           <p id="history-objective"></p>
+          <div class="history-progress"><label>Territorial victory<progress id="history-territory-progress" max="27" value="0"></progress></label><label>Development prosperity<progress id="history-prosperity-progress" max="600" value="0"></progress></label></div>
+          <section class="history-ledger"><h3>Your territories</h3><p class="game-help">Select a row to manage that center. Values update after every order.</p><div class="history-table-scroll"><table><thead><tr><th>Center</th><th>Forces</th><th>Stability</th><th>Supply</th></tr></thead><tbody id="history-territories"></tbody></table></div></section>
+          <details class="game-guide"><summary>Diplomatic directory</summary><p class="game-help">Choose a faction to inspect its nearest accessible center. Regional actors are simplified placeholders.</p><div id="history-diplomacy" class="history-directory"></div></details>
           <details class="game-guide"><summary>History, sources and simulation limits</summary><p id="history-context"></p><p>Era thresholds are a game-design timeline, not a claim that every society developed simultaneously. Military formations, treasury, population, connections and production are abstract game values. History is not forced to repeat after the opening.</p><p>Routes represent regional access, not shared national borders. Sea routes require navigation technology; ocean routes unlock later. Terrain, supply, morale and fortifications influence battles. Each center can mobilize once per turn.</p><p>Research unlocks period-appropriate units, better production and sea connections. Trade and stable civilian development build prosperity. There are no ideological bonuses, nuclear attacks or scripted atrocities.</p><p><a id="history-source-link" href="https://www.metmuseum.org/toah/chronology" target="_blank" rel="noopener noreferrer">Opening context / reference</a> · <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener noreferrer">Map: Natural Earth, public domain</a></p></details>
           <div class="card game-panel chronicle-panel"><h3>Campaign chronicle</h3><div class="game-log" id="history-log" aria-live="polite"></div></div>
         </section>
@@ -92,12 +112,12 @@
           <div class="card game-panel"><div class="eyebrow">YOUR FACTION</div><h3 id="history-faction-name"></h3><p class="game-help" id="history-government"></p><div class="game-stats">
             <div class="game-stat"><b id="history-treasury"></b><span>Treasury</span></div><div class="game-stat"><b id="history-balance"></b><span>Net / turn</span></div><div class="game-stat"><b id="history-food"></b><span>Provisions</span></div><div class="game-stat"><b id="history-forces"></b><span>Formations</span></div><div class="game-stat"><b id="history-science"></b><span>Knowledge</span></div><div class="game-stat"><b id="history-prosperity"></b><span>Prosperity</span></div>
           </div><p class="game-help" id="history-budget"></p><label>Tax policy<select id="history-tax"><option value="0.75">Low · stability first</option><option value="1">Normal · balanced</option><option value="1.35">High · unrest risk</option></select></label></div>
-          <div class="card game-panel"><h3>Knowledge &amp; technology</h3><p id="history-tech"></p><p class="game-help" id="history-units"></p><p class="game-help" id="history-research-hint"></p><button class="ghost" id="history-research">Invest in research · 60 treasury</button></div>
-          <div class="card game-panel"><label>Inspect a strategic center<select id="history-region-select"></select></label><div class="province-info" id="history-region-info"></div><p class="game-help" id="history-orders-source"></p><div class="game-actions">
+          <div class="card game-panel"><h3>Knowledge &amp; technology</h3><p id="history-tech"></p><p class="game-help" id="history-units"></p><p class="game-help" id="history-research-hint"></p><button class="ghost" id="history-research">Invest in research · 60 treasury</button><small id="history-research-reason" class="history-action-help"></small><details class="game-guide"><summary>Technology roadmap</summary><ol id="history-roadmap" class="history-roadmap"></ol></details></div>
+          <div class="card game-panel history-command" id="history-command"><h3 id="history-selected-name">Center command</h3><label>Inspect a strategic center<select id="history-region-select"></select></label><div class="province-info" id="history-region-info"></div><p class="game-help" id="history-orders-source"></p><p class="game-help" id="history-local-feedback"></p><button class="ghost" id="history-select-source">Return to your selected center</button><h4>Local development</h4><div class="game-actions">
             <button id="history-recruit">Recruit 4 formations · 35 + 12 provisions</button><button id="history-develop">Develop infrastructure · 60</button><button id="history-fortify">Fortify · 55</button><button id="history-relief">Civilian relief · 25 + 15 provisions</button>
-            <label>Transfer half your forces to<select id="history-move-target"></select></label><button id="history-move">Transfer forces</button><button id="history-war">Declare war on selected faction</button><button id="history-peace">Negotiate armistice · 40</button><button id="history-trade">Sign trade agreement · 30</button><button id="history-attack">Attack selected center</button>
+            <label>Transfer half your available forces to<select id="history-move-target"></select></label><button id="history-move">Transfer forces</button><h4>Diplomacy &amp; military</h4><button id="history-war">Declare war on selected faction</button><button id="history-peace">Negotiate armistice · 40</button><button id="history-trade">Sign trade agreement · 30</button><button id="history-attack">Attack selected center</button>
           </div></div>
-          <div id="history-status" role="status" aria-live="polite">Select your own center, then inspect a rival. War requires a declaration.</div><div id="history-result" class="history-result" hidden></div><button class="end-turn" id="history-end-turn"></button><small id="history-save"></small>
+          <div id="history-result" class="history-result" hidden></div><button class="end-turn" id="history-end-turn"></button><small id="history-save"></small>
         </aside>
       </div>
     </section>
@@ -1585,6 +1605,47 @@ function createHistoryEngine(catalog) {
   const scenario=()=>HISTORY_CATALOG.scenarios.find(x=>x.id===historyState.scenario);
   const factionColor=id=>{const index=scenario().factions.findIndex(f=>f[0]===id);return index<0?"#9a9e9a":palette[index%palette.length]};
   const terrainColor={hill:"#ab9580",forest:"#688c72",plain:"#b4b071",river:"#66acb1",coast:"#87b4cc",desert:"#d0b280"};
+  const orderHelp={recruit:"Adds 4 formations; uses mobilization, 200 inhabitants and 3 morale.",develop:"Adds 1 infrastructure level, improving income and provisions.",fortify:"Adds 1 defense level; each level multiplies defensive strength by +25% of its base.",relief:"Restores up to 15 stability and 8 morale.",move:"Moves half of the available force, leaving a garrison; both centers mobilize.",war:"Ends trade with this faction and adds 8 war weariness. Attacks become available.",peace:"Stops this war and prevents a new declaration for 5 turns.",trade:"Adds 8 treasury income per turn while both partners hold territory and remain at peace.",attack:"Commits all but one formation. Terrain, morale, technology and supplies affect the outcome.",research:"Invests 60 treasury for 30 knowledge; at most once per turn."};
+  const reasonNodes={};
+  for(const type of Object.keys(orderHelp)){
+    const reason=type==="research"?el("history-research-reason"):document.createElement("small");
+    if(type!=="research"){reason.id="history-"+type+"-reason";reason.className="history-action-help";el("history-"+type).after(reason)}
+    el("history-"+type).setAttribute("aria-describedby",reason.id||"history-research-reason");reasonNodes[type]=reason;
+  }
+  let priorityCenter=null;
+  function renderCommandHelp(){
+    for(const type of Object.keys(orderHelp)){
+      const local=["recruit","develop","fortify","relief","move"].includes(type);
+      const preview=local&&historyState.target?{ok:false,message:"Select one of your own centers to issue this order."}:historyEngine.action(JSON.parse(JSON.stringify(historyState)),type,type==="move"?{target:el("history-move-target").value}:{});
+      el("history-"+type).disabled=!preview.ok;
+      reasonNodes[type].textContent=preview.ok?orderHelp[type]:preview.message;
+      reasonNodes[type].className="history-action-help"+(preview.ok?"":" unavailable");
+    }
+  }
+  function renderCouncil(){
+    const s=historyState,n=s.nations[s.player],own=historyEngine.lands(s,s.player),b=historyEngine.budget(s,s.player),supplied=historyEngine.supply(s,s.player);
+    const unstable=own.find(p=>p.stability<50),isolated=own.find(p=>!supplied.has(p.id));
+    priorityCenter=(unstable||isolated||own.find(p=>!p.acted)||own[0])?.id;
+    let title="Build the foundations",advice="Develop infrastructure at a friendly center to improve production. Trade agreements can support a peaceful path to victory.";
+    if(s.over){title="Campaign complete";advice=s.result}
+    else if(n.food+b.harvest-b.consumption<0){title="Provisions need attention";advice="Your stockpile may run out next turn. Develop productive centers and avoid recruiting more troops until supply recovers."}
+    else if(unstable){title="Stabilize "+unstable.name;advice="Low stability weakens income and risks unrest. Civilian relief or lower taxes can help before your next advance."}
+    else if(isolated){title="Reconnect "+isolated.name;advice="This center has no friendly route to your capital. Isolated armies suffer attrition and cannot recruit. Inspect the supply map."}
+    else if(n.gold+b.income-b.upkeep<0){title="Treasury under pressure";advice="Your current balance risks a deficit. Seek trade, review taxation and reduce further recruitment."}
+    else if(n.tech<historyEngine.eraAt(s.year)&&n.gold>=60&&n.researchTurn!==s.turn){title="A new technology is within reach";advice="Invest in research to gain 30 knowledge. Reaching the next threshold unlocks stronger formations and better production."}
+    el("history-advice-title").textContent=title;el("history-advice").textContent=advice;
+    el("history-advice-action").disabled=!priorityCenter;el("history-advice-action").textContent=priorityCenter?"Inspect "+s.regions[priorityCenter].name:"No centers available";
+    const signed=x=>(x>=0?"+":"")+num(x);
+    el("history-turn-preview").textContent="Current rates: "+signed(b.income-b.upkeep)+" treasury · "+signed(b.harvest-b.consumption)+" provisions · +"+b.science+" knowledge per turn. Rivals and unrest can change the final result.";
+    el("history-next-top").textContent=el("history-end-turn").textContent;el("history-next-top").disabled=s.over;
+    el("history-territory-progress").value=own.length;el("history-prosperity-progress").value=n.prosperity;
+    const rows=own.map(p=>{const row=document.createElement("tr"),name=document.createElement("td"),button=document.createElement("button");button.className="history-row-button";button.textContent=p.name+(p.id===n.capital?" · capital":"");button.onclick=()=>selectCenter(p.id);name.append(button);row.append(name);for(const value of [p.army+(p.acted?" · used":" · ready"),Math.round(p.stability)+"%",supplied.has(p.id)?"Connected":"Isolated"]){const td=document.createElement("td");td.textContent=value;row.append(td)}return row});
+    el("history-territories").replaceChildren(...rows);
+    const partners=Object.keys(s.nations).filter(id=>id!==s.player&&historyEngine.lands(s,id).length);
+    partners.sort((a,b)=>Number(historyEngine.contact(s,s.player,b))-Number(historyEngine.contact(s,s.player,a))||s.nations[a].name.localeCompare(s.nations[b].name));
+    el("history-diplomacy").replaceChildren(...partners.map(id=>{const button=document.createElement("button"),contact=historyEngine.contact(s,s.player,id),relation=historyEngine.relation(s,s.player,id),lands=historyEngine.lands(s,id);button.className="history-diplomatic-row";button.textContent=s.nations[id].name+" · "+relation+" · "+lands.length+" centers"+(contact?"":" · no contact route");button.onclick=()=>{const links=s.source?historyEngine.routes(s,s.source,s.player):[];selectCenter((lands.find(p=>links.some(l=>l.id===p.id))||lands[0]).id)};return button}));
+    el("history-roadmap").replaceChildren(...HISTORY_CATALOG.eras.map((era,i)=>{const item=document.createElement("li");item.className=i<=n.tech?"unlocked":"";item.textContent=(i<=n.tech?"✓ ":i<=historyEngine.eraAt(s.year)?"Available · ":"From "+historyEngine.date(era.start)+" · ")+era.unlock;return item}));
+  }
   function node(tag,attrs={},text){
     const n=document.createElementNS("http://www.w3.org/2000/svg",tag);
     Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n;
@@ -1633,12 +1694,14 @@ function createHistoryEngine(catalog) {
       if(historyMode==="terrain")color=terrainColor[p.terrain];
       if(historyMode==="supply")color=p.owner===s.player?(supplied.has(p.id)?"#64c4a3":"#e98a75"):"#75848a";
       const group=node("g",{role:"button",tabindex:0,"aria-label":p.name+", "+s.nations[p.owner].name,"class":"history-center"});
+      group.setAttribute("aria-pressed",String(isSelected));
+      if(p.owner===s.player)group.append(node("circle",{cx:x,cy:y,r:12,fill:"none",stroke:"#e2c987","stroke-width":1,opacity:.7}));
       group.append(node("circle",{cx:x,cy:y,r:isSelected?9:6,fill:color,stroke:isSelected?"#fff2c7":"#10232c","stroke-width":isSelected?2:1}));
       group.append(node("circle",{cx:x,cy:y,r:11,fill:"transparent"}));
       group.append(node("title",{},p.name+" · "+s.nations[p.owner].name+" · "+p.army+" formations"));
       group.onclick=()=>selectCenter(p.id);group.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selectCenter(p.id)}};
       svg.append(group);
-      if(isSelected||historyZoom>=2.5){
+      if(isSelected||p.owner===s.player||historyZoom>=2.5){
         svg.append(node("text",{x:x+12,y:y-10,fill:"#f6edda","font-size":historyZoom>=2.5?6:11,"font-weight":700,"paint-order":"stroke",stroke:"#0f2531","stroke-width":2,"pointer-events":"none"},p.name));
       }
     }
@@ -1648,7 +1711,7 @@ function createHistoryEngine(catalog) {
   }
   function selectCenter(id){
     const p=historyState.regions[id];if(p.owner===historyState.player){historyState.source=id;historyState.target=null}else historyState.target=id;
-    if(historyZoom>1)historyCenter=project(p);renderHistory();
+    if(historyZoom>1)historyCenter=project(p);renderHistory();el("history-command").scrollIntoView({behavior:"smooth",block:"nearest"});
   }
   function renderHistory(){
     const s=historyState,n=s.nations[s.player],currentEra=HISTORY_CATALOG.eras[historyEngine.eraAt(s.year)],tech=HISTORY_CATALOG.eras[n.tech],b=historyEngine.budget(s,s.player),own=historyEngine.lands(s,s.player),source=s.regions[s.source],target=s.regions[s.target],selected=target||source;
@@ -1669,8 +1732,11 @@ function createHistoryEngine(catalog) {
     el("history-region-select").value=selected?.id||"";
     const lines=selected?[s.nations[selected.owner].name+" · "+selected.terrain,selected.army+" formations · morale "+Math.round(selected.morale)+"%","Infrastructure "+selected.economy+"/10 · defenses "+selected.fort+"/3","Stability "+Math.round(selected.stability)+"% · simulated inhabitants "+num(selected.people),
       selected.owner===s.player?(historyEngine.supply(s,s.player).has(selected.id)?"Supply connected":"Supply isolated"):"Diplomacy: "+historyEngine.relation(s,s.player,selected.owner)]:["No centers remain."];
-    if(source&&target){const f=historyEngine.forecast(s,source,target);lines.push(f.reachable?"Battle outlook: "+(f.ratio>1.2?"attacker advantage":f.ratio<.85?"defender advantage":"closely matched"):"No unlocked direct route from "+source.name+".")}
+    if(source&&target){const f=historyEngine.forecast(s,source,target);lines.push(f.reachable?"Battle outlook: "+(f.ratio>1.2?"attacker advantage":f.ratio<.85?"defender advantage":"closely matched")+" · estimate, not a guaranteed result":"No unlocked direct route from "+source.name+".");if(f.reachable)lines.push("Effective strength: "+f.attack.toFixed(1)+" attacking / "+f.defend.toFixed(1)+" defending. Terrain ×"+historyEngine.defense[target.terrain]+"; defenses ×"+(1+target.fort*.25).toFixed(2)+".")}
     textRows(el("history-region-info"),lines);
+    el("history-selected-name").textContent=selected?.name||"Center command";
+    el("history-select-source").hidden=!target||!source;
+    el("history-select-source").textContent=source?"Return to "+source.name:"No friendly center";
     el("history-orders-source").textContent=source?"Orders from "+source.name+(source.acted?" · mobilization used":" · forces available"):"No friendly center";
     const blocked=s.over||!source||source.owner!==s.player;
     const canSupply=source&&historyEngine.supply(s,s.player).has(source.id);
@@ -1693,18 +1759,23 @@ function createHistoryEngine(catalog) {
     textRows(el("history-log"),s.log);
     el("history-context").textContent=scenario().note+" Continuous campaigns retain your founding factions instead of forcing historical rise and fall.";
     el("history-source-link").href=scenario().source;
-    drawEarth();saveHistory();
+    el("history-local-feedback").textContent=el("history-status").textContent;
+    renderCommandHelp();renderCouncil();drawEarth();saveHistory();
   }
   function historicalOrder(type,args={}){
     const result=historyEngine.action(historyState,type,args);
-    el("history-status").textContent=result.ok?"Order executed.":result.message;
+    el("history-status").textContent=result.ok?(type==="tax"?"Tax policy updated. Its effects resolve each turn.":type==="relief"?"Civilian relief delivered: stability and morale improved.":type==="research"?"Research investment complete. Review your knowledge and technology below.":historyState.log[0]):result.message;
     if(historyState.regions[historyState.target]?.owner===historyState.player)historyState.target=null;
     renderHistory();
   }
   for(const type of ["recruit","develop","fortify","relief","attack","war","peace","trade","research"])el("history-"+type).onclick=()=>historicalOrder(type);
   el("history-tax").onchange=e=>historicalOrder("tax",{value:Number(e.target.value)});
   el("history-move").onclick=()=>historicalOrder("move",{target:el("history-move-target").value});
-  el("history-end-turn").onclick=()=>{historyEngine.nextTurn(historyState);el("history-status").textContent="Economies, supply and rival decisions resolved.";renderHistory()};
+  el("history-end-turn").onclick=()=>{const before=historyState.nations[historyState.player],snapshot={gold:before.gold,food:before.food,lands:historyEngine.lands(historyState,historyState.player).length};historyEngine.nextTurn(historyState);const after=historyState.nations[historyState.player],signed=v=>(v>=0?"+":"")+num(v);el("history-status").textContent="Turn report · "+signed(after.gold-snapshot.gold)+" treasury · "+signed(after.food-snapshot.food)+" provisions · "+signed(historyEngine.lands(historyState,historyState.player).length-snapshot.lands)+" centers. Review the chronicle for rival actions.";renderHistory()};
+  el("history-next-top").onclick=()=>el("history-end-turn").onclick();
+  el("history-advice-action").onclick=()=>{if(priorityCenter)selectCenter(priorityCenter)};
+  el("history-select-source").onclick=()=>{if(historyState.source)selectCenter(historyState.source)};
+  el("history-move-target").onchange=renderCommandHelp;
   el("history-region-select").onchange=e=>selectCenter(e.target.value);
   el("history-map-mode").onchange=e=>{historyMode=e.target.value;drawEarth()};
   el("history-zoom-in").onclick=()=>{historyZoom=Math.min(4,historyZoom+.5);historyCenter=project(historyState.regions[historyState.target||historyState.source]||{lon:0,lat:10});drawEarth()};

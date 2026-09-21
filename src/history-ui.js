@@ -9,6 +9,47 @@
   const scenario=()=>HISTORY_CATALOG.scenarios.find(x=>x.id===historyState.scenario);
   const factionColor=id=>{const index=scenario().factions.findIndex(f=>f[0]===id);return index<0?"#9a9e9a":palette[index%palette.length]};
   const terrainColor={hill:"#ab9580",forest:"#688c72",plain:"#b4b071",river:"#66acb1",coast:"#87b4cc",desert:"#d0b280"};
+  const orderHelp={recruit:"Adds 4 formations; uses mobilization, 200 inhabitants and 3 morale.",develop:"Adds 1 infrastructure level, improving income and provisions.",fortify:"Adds 1 defense level; each level multiplies defensive strength by +25% of its base.",relief:"Restores up to 15 stability and 8 morale.",move:"Moves half of the available force, leaving a garrison; both centers mobilize.",war:"Ends trade with this faction and adds 8 war weariness. Attacks become available.",peace:"Stops this war and prevents a new declaration for 5 turns.",trade:"Adds 8 treasury income per turn while both partners hold territory and remain at peace.",attack:"Commits all but one formation. Terrain, morale, technology and supplies affect the outcome.",research:"Invests 60 treasury for 30 knowledge; at most once per turn."};
+  const reasonNodes={};
+  for(const type of Object.keys(orderHelp)){
+    const reason=type==="research"?el("history-research-reason"):document.createElement("small");
+    if(type!=="research"){reason.id="history-"+type+"-reason";reason.className="history-action-help";el("history-"+type).after(reason)}
+    el("history-"+type).setAttribute("aria-describedby",reason.id||"history-research-reason");reasonNodes[type]=reason;
+  }
+  let priorityCenter=null;
+  function renderCommandHelp(){
+    for(const type of Object.keys(orderHelp)){
+      const local=["recruit","develop","fortify","relief","move"].includes(type);
+      const preview=local&&historyState.target?{ok:false,message:"Select one of your own centers to issue this order."}:historyEngine.action(JSON.parse(JSON.stringify(historyState)),type,type==="move"?{target:el("history-move-target").value}:{});
+      el("history-"+type).disabled=!preview.ok;
+      reasonNodes[type].textContent=preview.ok?orderHelp[type]:preview.message;
+      reasonNodes[type].className="history-action-help"+(preview.ok?"":" unavailable");
+    }
+  }
+  function renderCouncil(){
+    const s=historyState,n=s.nations[s.player],own=historyEngine.lands(s,s.player),b=historyEngine.budget(s,s.player),supplied=historyEngine.supply(s,s.player);
+    const unstable=own.find(p=>p.stability<50),isolated=own.find(p=>!supplied.has(p.id));
+    priorityCenter=(unstable||isolated||own.find(p=>!p.acted)||own[0])?.id;
+    let title="Build the foundations",advice="Develop infrastructure at a friendly center to improve production. Trade agreements can support a peaceful path to victory.";
+    if(s.over){title="Campaign complete";advice=s.result}
+    else if(n.food+b.harvest-b.consumption<0){title="Provisions need attention";advice="Your stockpile may run out next turn. Develop productive centers and avoid recruiting more troops until supply recovers."}
+    else if(unstable){title="Stabilize "+unstable.name;advice="Low stability weakens income and risks unrest. Civilian relief or lower taxes can help before your next advance."}
+    else if(isolated){title="Reconnect "+isolated.name;advice="This center has no friendly route to your capital. Isolated armies suffer attrition and cannot recruit. Inspect the supply map."}
+    else if(n.gold+b.income-b.upkeep<0){title="Treasury under pressure";advice="Your current balance risks a deficit. Seek trade, review taxation and reduce further recruitment."}
+    else if(n.tech<historyEngine.eraAt(s.year)&&n.gold>=60&&n.researchTurn!==s.turn){title="A new technology is within reach";advice="Invest in research to gain 30 knowledge. Reaching the next threshold unlocks stronger formations and better production."}
+    el("history-advice-title").textContent=title;el("history-advice").textContent=advice;
+    el("history-advice-action").disabled=!priorityCenter;el("history-advice-action").textContent=priorityCenter?"Inspect "+s.regions[priorityCenter].name:"No centers available";
+    const signed=x=>(x>=0?"+":"")+num(x);
+    el("history-turn-preview").textContent="Current rates: "+signed(b.income-b.upkeep)+" treasury · "+signed(b.harvest-b.consumption)+" provisions · +"+b.science+" knowledge per turn. Rivals and unrest can change the final result.";
+    el("history-next-top").textContent=el("history-end-turn").textContent;el("history-next-top").disabled=s.over;
+    el("history-territory-progress").value=own.length;el("history-prosperity-progress").value=n.prosperity;
+    const rows=own.map(p=>{const row=document.createElement("tr"),name=document.createElement("td"),button=document.createElement("button");button.className="history-row-button";button.textContent=p.name+(p.id===n.capital?" · capital":"");button.onclick=()=>selectCenter(p.id);name.append(button);row.append(name);for(const value of [p.army+(p.acted?" · used":" · ready"),Math.round(p.stability)+"%",supplied.has(p.id)?"Connected":"Isolated"]){const td=document.createElement("td");td.textContent=value;row.append(td)}return row});
+    el("history-territories").replaceChildren(...rows);
+    const partners=Object.keys(s.nations).filter(id=>id!==s.player&&historyEngine.lands(s,id).length);
+    partners.sort((a,b)=>Number(historyEngine.contact(s,s.player,b))-Number(historyEngine.contact(s,s.player,a))||s.nations[a].name.localeCompare(s.nations[b].name));
+    el("history-diplomacy").replaceChildren(...partners.map(id=>{const button=document.createElement("button"),contact=historyEngine.contact(s,s.player,id),relation=historyEngine.relation(s,s.player,id),lands=historyEngine.lands(s,id);button.className="history-diplomatic-row";button.textContent=s.nations[id].name+" · "+relation+" · "+lands.length+" centers"+(contact?"":" · no contact route");button.onclick=()=>{const links=s.source?historyEngine.routes(s,s.source,s.player):[];selectCenter((lands.find(p=>links.some(l=>l.id===p.id))||lands[0]).id)};return button}));
+    el("history-roadmap").replaceChildren(...HISTORY_CATALOG.eras.map((era,i)=>{const item=document.createElement("li");item.className=i<=n.tech?"unlocked":"";item.textContent=(i<=n.tech?"✓ ":i<=historyEngine.eraAt(s.year)?"Available · ":"From "+historyEngine.date(era.start)+" · ")+era.unlock;return item}));
+  }
   function node(tag,attrs={},text){
     const n=document.createElementNS("http://www.w3.org/2000/svg",tag);
     Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n;
@@ -57,12 +98,14 @@
       if(historyMode==="terrain")color=terrainColor[p.terrain];
       if(historyMode==="supply")color=p.owner===s.player?(supplied.has(p.id)?"#64c4a3":"#e98a75"):"#75848a";
       const group=node("g",{role:"button",tabindex:0,"aria-label":p.name+", "+s.nations[p.owner].name,"class":"history-center"});
+      group.setAttribute("aria-pressed",String(isSelected));
+      if(p.owner===s.player)group.append(node("circle",{cx:x,cy:y,r:12,fill:"none",stroke:"#e2c987","stroke-width":1,opacity:.7}));
       group.append(node("circle",{cx:x,cy:y,r:isSelected?9:6,fill:color,stroke:isSelected?"#fff2c7":"#10232c","stroke-width":isSelected?2:1}));
       group.append(node("circle",{cx:x,cy:y,r:11,fill:"transparent"}));
       group.append(node("title",{},p.name+" · "+s.nations[p.owner].name+" · "+p.army+" formations"));
       group.onclick=()=>selectCenter(p.id);group.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selectCenter(p.id)}};
       svg.append(group);
-      if(isSelected||historyZoom>=2.5){
+      if(isSelected||p.owner===s.player||historyZoom>=2.5){
         svg.append(node("text",{x:x+12,y:y-10,fill:"#f6edda","font-size":historyZoom>=2.5?6:11,"font-weight":700,"paint-order":"stroke",stroke:"#0f2531","stroke-width":2,"pointer-events":"none"},p.name));
       }
     }
@@ -72,7 +115,7 @@
   }
   function selectCenter(id){
     const p=historyState.regions[id];if(p.owner===historyState.player){historyState.source=id;historyState.target=null}else historyState.target=id;
-    if(historyZoom>1)historyCenter=project(p);renderHistory();
+    if(historyZoom>1)historyCenter=project(p);renderHistory();el("history-command").scrollIntoView({behavior:"smooth",block:"nearest"});
   }
   function renderHistory(){
     const s=historyState,n=s.nations[s.player],currentEra=HISTORY_CATALOG.eras[historyEngine.eraAt(s.year)],tech=HISTORY_CATALOG.eras[n.tech],b=historyEngine.budget(s,s.player),own=historyEngine.lands(s,s.player),source=s.regions[s.source],target=s.regions[s.target],selected=target||source;
@@ -93,8 +136,11 @@
     el("history-region-select").value=selected?.id||"";
     const lines=selected?[s.nations[selected.owner].name+" · "+selected.terrain,selected.army+" formations · morale "+Math.round(selected.morale)+"%","Infrastructure "+selected.economy+"/10 · defenses "+selected.fort+"/3","Stability "+Math.round(selected.stability)+"% · simulated inhabitants "+num(selected.people),
       selected.owner===s.player?(historyEngine.supply(s,s.player).has(selected.id)?"Supply connected":"Supply isolated"):"Diplomacy: "+historyEngine.relation(s,s.player,selected.owner)]:["No centers remain."];
-    if(source&&target){const f=historyEngine.forecast(s,source,target);lines.push(f.reachable?"Battle outlook: "+(f.ratio>1.2?"attacker advantage":f.ratio<.85?"defender advantage":"closely matched"):"No unlocked direct route from "+source.name+".")}
+    if(source&&target){const f=historyEngine.forecast(s,source,target);lines.push(f.reachable?"Battle outlook: "+(f.ratio>1.2?"attacker advantage":f.ratio<.85?"defender advantage":"closely matched")+" · estimate, not a guaranteed result":"No unlocked direct route from "+source.name+".");if(f.reachable)lines.push("Effective strength: "+f.attack.toFixed(1)+" attacking / "+f.defend.toFixed(1)+" defending. Terrain ×"+historyEngine.defense[target.terrain]+"; defenses ×"+(1+target.fort*.25).toFixed(2)+".")}
     textRows(el("history-region-info"),lines);
+    el("history-selected-name").textContent=selected?.name||"Center command";
+    el("history-select-source").hidden=!target||!source;
+    el("history-select-source").textContent=source?"Return to "+source.name:"No friendly center";
     el("history-orders-source").textContent=source?"Orders from "+source.name+(source.acted?" · mobilization used":" · forces available"):"No friendly center";
     const blocked=s.over||!source||source.owner!==s.player;
     const canSupply=source&&historyEngine.supply(s,s.player).has(source.id);
@@ -117,18 +163,23 @@
     textRows(el("history-log"),s.log);
     el("history-context").textContent=scenario().note+" Continuous campaigns retain your founding factions instead of forcing historical rise and fall.";
     el("history-source-link").href=scenario().source;
-    drawEarth();saveHistory();
+    el("history-local-feedback").textContent=el("history-status").textContent;
+    renderCommandHelp();renderCouncil();drawEarth();saveHistory();
   }
   function historicalOrder(type,args={}){
     const result=historyEngine.action(historyState,type,args);
-    el("history-status").textContent=result.ok?"Order executed.":result.message;
+    el("history-status").textContent=result.ok?(type==="tax"?"Tax policy updated. Its effects resolve each turn.":type==="relief"?"Civilian relief delivered: stability and morale improved.":type==="research"?"Research investment complete. Review your knowledge and technology below.":historyState.log[0]):result.message;
     if(historyState.regions[historyState.target]?.owner===historyState.player)historyState.target=null;
     renderHistory();
   }
   for(const type of ["recruit","develop","fortify","relief","attack","war","peace","trade","research"])el("history-"+type).onclick=()=>historicalOrder(type);
   el("history-tax").onchange=e=>historicalOrder("tax",{value:Number(e.target.value)});
   el("history-move").onclick=()=>historicalOrder("move",{target:el("history-move-target").value});
-  el("history-end-turn").onclick=()=>{historyEngine.nextTurn(historyState);el("history-status").textContent="Economies, supply and rival decisions resolved.";renderHistory()};
+  el("history-end-turn").onclick=()=>{const before=historyState.nations[historyState.player],snapshot={gold:before.gold,food:before.food,lands:historyEngine.lands(historyState,historyState.player).length};historyEngine.nextTurn(historyState);const after=historyState.nations[historyState.player],signed=v=>(v>=0?"+":"")+num(v);el("history-status").textContent="Turn report · "+signed(after.gold-snapshot.gold)+" treasury · "+signed(after.food-snapshot.food)+" provisions · "+signed(historyEngine.lands(historyState,historyState.player).length-snapshot.lands)+" centers. Review the chronicle for rival actions.";renderHistory()};
+  el("history-next-top").onclick=()=>el("history-end-turn").onclick();
+  el("history-advice-action").onclick=()=>{if(priorityCenter)selectCenter(priorityCenter)};
+  el("history-select-source").onclick=()=>{if(historyState.source)selectCenter(historyState.source)};
+  el("history-move-target").onchange=renderCommandHelp;
   el("history-region-select").onchange=e=>selectCenter(e.target.value);
   el("history-map-mode").onchange=e=>{historyMode=e.target.value;drawEarth()};
   el("history-zoom-in").onclick=()=>{historyZoom=Math.min(4,historyZoom+.5);historyCenter=project(historyState.regions[historyState.target||historyState.source]||{lon:0,lat:10});drawEarth()};

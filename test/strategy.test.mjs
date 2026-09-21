@@ -139,6 +139,8 @@ class Element {
   children=[];attributes={};style={};value='';disabled=false;hidden=false;textContent='';
   classList={toggle(){},add(){},remove(){}};
   setAttribute(k,v){this.attributes[k]=v}
+  after(){}
+  scrollIntoView(){}
   append(...items){this.children.push(...items);if(!this.value&&items[0]?.value)this.value=items[0].value}
   replaceChildren(...items){this.children=[];this.value='';this.append(...items)}
   get options(){return this.children}
@@ -152,6 +154,14 @@ for(const mode of ['normal','blocked','corrupt'])test('UI is usable with '+mode+
     localStorage:{getItem(k){if(mode==='blocked')throw Error('denied');return saves.get(k)},setItem(k,v){if(mode==='blocked')throw Error('denied');saves.set(k,v)}}};
   vm.runInNewContext(readFileSync(new URL('../src/history-ui.js',import.meta.url),'utf8'),context);
   assert.equal(nodes.get('history-date').textContent,'1444 CE');
+  const beforePreview=saves.get('musewave-human-history-v4');
+  assert.equal(nodes.get('history-territories').children.length,1);
+  assert.equal(nodes.get('history-roadmap').children.length,10);
+  nodes.get('history-region-select').onchange({target:{value:catalog.regions.find(p=>p[1]==='North China')[0]}});
+  assert.equal(nodes.get('history-recruit').disabled,true,'Foreign inspection must not recruit at a hidden friendly source');
+  nodes.get('history-select-source').onclick();
+  assert.equal(nodes.get('history-recruit').disabled,false);
+  if(mode==='normal')assert.equal(JSON.parse(saves.get('musewave-human-history-v4')).nations.ottoman.gold,JSON.parse(beforePreview).nations.ottoman.gold,'Action previews must not spend resources');
   nodes.get('history-recruit').onclick();assert.equal(nodes.get('history-treasury').textContent,'185');
   nodes.get('history-end-turn').onclick();assert.equal(nodes.get('history-date').textContent,'1450 CE');
   nodes.get('history-scenario').value='origins';nodes.get('history-scenario').onchange();

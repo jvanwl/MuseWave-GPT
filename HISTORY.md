@@ -16,6 +16,12 @@ constitutional mechanics.
 
 ## Implemented
 
+- Turn council with context-aware priorities, current-rate forecasts and actual turn reports.
+- Accessible action explanations from the same validation logic as the simulation.
+- Foreign inspection cannot silently issue local development orders at another center.
+- Territory ledger, diplomatic directory, victory progress and technology roadmap.
+- Collapsible campaign setup, quick-start guide and map labels for friendly holdings.
+
 - Real Earth coastline geometry; 44 selectable strategic locations, pan and zoom.
 - Faction control, terrain, supply and accessible route overlays.
 - Ten starting scenarios and ten technology tiers.
