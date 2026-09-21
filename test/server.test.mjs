@@ -10,9 +10,9 @@ test("widget contains the MCP Apps bridge and studio controls", () => {
   assert.match(html, /FREE BETA/);
   assert.match(html, /start_plan_checkout/);
   assert.match(html, /Echoes of Dominion/);
-  assert.match(html, /provinceBlueprint/);
-  assert.match(html, /createStrategyEngine/);
-  assert.match(html, /Negociar tregua/);
+  assert.match(html, /HISTORY_CATALOG/);
+  assert.match(html, /createHistoryEngine/);
+  assert.match(html, /Negotiate armistice/);
 });
 
 test("server exposes the MCP endpoint and UI resource", () => {

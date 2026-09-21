@@ -1,104 +1,163 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import vm from 'node:vm';
+import { HISTORY_CATALOG as catalog } from '../src/history-data.mjs';
+import { EARTH_PATHS } from '../src/earth-map.mjs';
+import { createHistoryEngine } from '../src/history-engine.mjs';
+const engine=createHistoryEngine(catalog);
+const html=()=>readFileSync(new URL('../public/music-studio.html',import.meta.url),'utf8');
 
-const html=readFileSync(new URL('../public/music-studio.html',import.meta.url),'utf8');
-const data=html.slice(html.indexOf('  const provinceBlueprint='),html.indexOf('  // STRATEGY_ENGINE_START'));
-const engine=html.split('// STRATEGY_ENGINE_START')[1].split('// STRATEGY_ENGINE_END')[0];
-const make=new Function(data+engine+'return createStrategyEngine(provinceBlueprint,adjacency);');
-
-test('complete studio script parses and all DOM IDs are unique',()=>{
-  new vm.Script(html.split('<script type="module">')[1].split('</script>')[0]);
-  const ids=[...html.split('<script')[0].matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+test('history widget bundle is synchronized, parses and has unique IDs',()=>{
+  execFileSync(process.execPath,[new URL('../scripts/build-history.mjs',import.meta.url).pathname,'--check']);
+  const source=html();
+  new vm.Script(source.split('<script type="module">')[1].split('</script>')[0]);
+  const ids=[...source.split('<script')[0].matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
   assert.equal(new Set(ids).size,ids.length);
 });
-test('recruitment consumes treasury, food, population and action',()=>{
-  const e=make(),s=e.fresh(),p=s.provinces.sunspire,before=p.population;
-  assert.equal(e.action(s,'recruit').ok,true);
-  assert.equal(s.nations.player.gold,145);assert.equal(s.nations.player.food,188);
-  assert.equal(p.army,28);assert.equal(p.population,before-400);
-  assert.equal(e.action(s,'recruit').ok,false);
+test('Earth geometry is bundled locally and scenarios cover ten starting dates',()=>{
+  assert.equal(catalog.scenarios.length,10);assert.equal(catalog.regions.length,44);
+  assert.ok(EARTH_PATHS.length>100);assert.ok(EARTH_PATHS.every(p=>p.startsWith('M')&&p.endsWith('Z')));
+  assert.equal(catalog.scenarios[0].year,-10000);assert.equal(catalog.scenarios.at(-1).year,2000);
 });
-test('unaffordable and foreign orders cannot mutate the game',()=>{
-  const e=make(),s=e.fresh();s.nations.player.gold=0;const before=JSON.stringify(s);
-  assert.equal(e.action(s,'fortify').ok,false);
-  assert.equal(e.action(s,'recruit',{source:'redmarch'}).ok,false);
-  assert.equal(JSON.stringify(s),before);
-});
-test('attack requires a shared border and declared war',()=>{
-  const e=make(),s=e.fresh();
-  assert.equal(e.action(s,'attack',{target:'heartland'}).ok,false);
-  assert.equal(e.action(s,'war',{target:'heartland'}).ok,true);
-  assert.equal(e.action(s,'attack',{target:'eastbay'}).ok,false);
-  assert.equal(e.action(s,'attack',{target:'heartland'}).ok,true);
-  assert.equal(e.action(s,'attack',{target:'heartland'}).ok,false);
-});
-test('peace establishes an enforced five-season truce',()=>{
-  const e=make(),s=e.fresh();assert.equal(e.action(s,'peace',{target:'redmarch'}).ok,true);
-  assert.equal(e.relation(s,'player','ember'),'paz');
-  assert.equal(e.action(s,'war',{target:'redmarch'}).ok,false);
-  s.turn+=5;assert.equal(e.action(s,'war',{target:'redmarch'}).ok,true);
-});
-test('mountains and fortifications improve defense; winter cuts production',()=>{
-  const e=make(),s=e.fresh(),a=s.provinces.sunspire,d=s.provinces.heartland;
-  const normal=e.forecast(s,a,d);d.terrain='montaña';d.fort=2;
-  assert.ok(e.forecast(s,a,d).defend>normal.defend*2);
-  const harvest=e.budget(s,'player').harvest;s.turn=4;
-  assert.ok(e.budget(s,'player').harvest<harvest*.36);
-  assert.ok(e.forecast(s,a,d).attack<normal.attack);
-});
-test('isolated provinces cannot recruit and suffer attrition',()=>{
-  const e=make(),s=e.fresh();s.provinces.westhaven.owner='neutral';
-  assert.equal(e.supply(s,'player').has('goldcoast'),false);
-  assert.equal(e.action(s,'recruit',{source:'goldcoast'}).ok,false);
-  const army=s.provinces.goldcoast.army;e.nextTurn(s);assert.ok(s.provinces.goldcoast.army<army);
-});
-test('troop transfers conserve troops and prevent relay moves',()=>{
-  const e=make(),s=e.fresh(),total=()=>e.lands(s,'player').reduce((a,p)=>a+p.army,0),before=total();
-  assert.equal(e.action(s,'move',{target:'westhaven'}).ok,true);
-  assert.equal(total(),before);
-  assert.equal(e.action(s,'move',{source:'westhaven',target:'goldcoast'}).ok,false);
-});
-test('high taxes worsen stability compared with low taxes',()=>{
-  const e=make(),high=e.fresh(),low=e.fresh();
-  e.action(high,'tax',{value:1.35});e.action(low,'tax',{value:.75});
-  e.nextTurn(high);e.nextTurn(low);
-  assert.ok(high.provinces.sunspire.stability<low.provinces.sunspire.stability);
-});
-test('save validation rejects corrupt data and restores deterministic state',()=>{
-  const e=make(),s=e.fresh();e.nextTurn(s);
-  assert.deepEqual(e.restore(JSON.parse(JSON.stringify(s))),s);
-  assert.throws(()=>e.restore({version:3}));
-  const bad=structuredClone(s);bad.provinces.sunspire.army='many';assert.throws(()=>e.restore(bad));
-  const a=structuredClone(s),b=e.restore(s);e.nextTurn(a);e.nextTurn(b);assert.deepEqual(a,b);
-});
-test('one hundred seasons preserve resource and ownership invariants',()=>{
-  const e=make(),s=e.fresh();
-  for(let i=0;i<100;i++){
-    e.nextTurn(s);
-    for(const n of Object.values(s.nations)){assert.ok(Number.isFinite(n.gold)&&n.gold>=0);assert.ok(Number.isFinite(n.food)&&n.food>=0)}
-    for(const p of Object.values(s.provinces)){assert.ok(p.army>=1);assert.ok(p.stability>=0&&p.stability<=100);assert.ok(Object.hasOwn(e.names,p.owner))}
+for(const scenario of catalog.scenarios)test('all factions in '+scenario.name+' start, advance, save and restore',()=>{
+  const seen=new Set();
+  for(const [id,,government,owned] of scenario.factions){
+    assert.ok(government);
+    for(const region of owned){assert.ok(!seen.has(region),'duplicate ownership');seen.add(region);}
+    const s=engine.fresh(scenario.id,id);
+    assert.equal(s.player,id);assert.equal(s.regions[s.source].owner,id);
+    assert.equal(engine.eraAt(s.year),scenario.era);
+    engine.nextTurn(s);
+    assert.deepEqual(engine.restore(JSON.parse(JSON.stringify(s))),s);
   }
 });
-
+test('recruitment consumes people, provisions, treasury and mobilization',()=>{
+  const s=engine.fresh('early'),p=s.regions[s.source],population=p.people;
+  assert.equal(engine.action(s,'recruit').ok,true);
+  assert.equal(s.nations[s.player].gold,185);assert.equal(s.nations[s.player].food,238);
+  assert.equal(p.people,population-200);assert.equal(p.army,20);
+  assert.equal(engine.action(s,'recruit').ok,false);
+});
+test('unaffordable and foreign orders leave state unchanged',()=>{
+  const s=engine.fresh('early');s.nations[s.player].gold=0;const before=JSON.stringify(s);
+  assert.equal(engine.action(s,'fortify').ok,false);
+  assert.equal(engine.action(s,'recruit',{source:'france'}).ok,false);
+  assert.equal(JSON.stringify(s),before);
+});
+test('attacks require declaration, route and uncommitted forces',()=>{
+  const s=engine.fresh('early');
+  assert.equal(engine.action(s,'attack',{target:'levant'}).ok,false);
+  assert.equal(engine.action(s,'war',{target:'levant'}).ok,true);
+  assert.equal(engine.action(s,'attack',{target:'japan'}).ok,false);
+  assert.equal(engine.action(s,'attack',{target:'levant'}).ok,true);
+  assert.equal(engine.action(s,'attack',{target:'levant'}).ok,false);
+});
+test('peace enforces a five-turn truce; trade gives income and war cancels it',()=>{
+  const s=engine.fresh('early');
+  engine.action(s,'war',{target:'levant'});
+  assert.equal(engine.action(s,'peace',{target:'levant'}).ok,true);
+  assert.equal(engine.action(s,'war',{target:'levant'}).ok,false);
+  const income=engine.budget(s,s.player).income;
+  assert.equal(engine.action(s,'trade',{target:'levant'}).ok,true);
+  assert.equal(engine.budget(s,s.player).income,income+8);
+  s.turn+=5;assert.equal(engine.action(s,'war',{target:'levant'}).ok,true);
+  assert.equal(engine.budget(s,s.player).income,income);
+});
+test('supply breaks across hostile centers and isolated armies suffer attrition',()=>{
+  const s=engine.fresh('classical','persian');
+  s.regions.mesopotamia.owner='local_mesopotamia';
+  s.regions.indus.owner='local_indus';
+  const p=s.regions.nile,old=p.army;
+  assert.equal(engine.supply(s,s.player).has('nile'),false);
+  assert.equal(engine.action(s,'recruit',{source:'nile'}).ok,false);
+  engine.nextTurn(s);assert.ok(p.army<old);
+});
+test('mountains, fortifications and technology influence combat',()=>{
+  const s=engine.fresh('early'),a=s.regions.anatolia,d=s.regions.levant;
+  const normal=engine.forecast(s,a,d);d.terrain='hill';d.fort=3;
+  assert.ok(engine.forecast(s,a,d).defend>normal.defend);
+  s.nations[s.player].tech=4;
+  assert.ok(engine.forecast(s,a,d).attack>normal.attack);
+});
+test('transfers conserve forces and cannot relay within the same turn',()=>{
+  const s=engine.fresh('classical','persian'),total=()=>engine.lands(s,s.player).reduce((v,p)=>v+p.army,0),before=total();
+  assert.equal(engine.action(s,'move',{source:'persia',target:'mesopotamia'}).ok,true);
+  assert.equal(total(),before);
+  assert.equal(engine.action(s,'move',{source:'mesopotamia',target:'levant'}).ok,false);
+});
+test('higher taxes worsen stability',()=>{
+  const high=engine.fresh('early'),low=engine.fresh('early');
+  engine.action(high,'tax',{value:1.35});engine.action(low,'tax',{value:.75});
+  engine.nextTurn(high);engine.nextTurn(low);
+  assert.ok(high.regions.anatolia.stability<low.regions.anatolia.stability);
+});
+test('ocean routes and research are unavailable before their era',()=>{
+  const s=engine.fresh('early','castile');
+  assert.equal(engine.action(s,'trade',{target:'caribbean'}).ok,false);
+  assert.equal(engine.action(s,'war',{target:'caribbean'}).ok,false);
+  assert.equal(engine.routes(s,'iberia',s.player).some(x=>x.id==='caribbean'),false);
+  assert.equal(engine.action(s,'research').ok,false);
+  engine.nextTurn(s);assert.equal(s.year,1450);
+  const n=s.nations[s.player];n.science=100;
+  assert.equal(engine.action(s,'research').ok,true);assert.equal(n.tech,4);
+  assert.equal(engine.routes(s,'iberia',s.player).some(x=>x.id==='caribbean'),true);
+  assert.equal(engine.action(s,'trade',{target:'caribbean'}).ok,true);
+});
+test('continuous calendar crosses every era without year zero or ownership reset',()=>{
+  let year=-10000,count=0;const seen=new Set();
+  while(year<2025&&count<1000){seen.add(engine.eraAt(year));const next=engine.advanceYear(year);assert.ok(next>year);assert.notEqual(next,0);year=next;count++;}
+  assert.equal(year,2025);assert.equal(seen.size,10);
+  assert.equal(engine.date(-1),'1 BCE');assert.equal(engine.date(1),'1 CE');
+  const s=engine.fresh('early');engine.nextTurn(s);
+  assert.equal(s.year,1450);assert.equal(s.regions.anatolia.owner,'ottoman');
+  assert.equal(s.nations.ottoman.name,'Ottoman Empire');
+});
+test('saves reject corruption, anachronistic tech and older schemas',()=>{
+  assert.throws(()=>engine.restore({version:3}));
+  const s=engine.fresh('origins');s.nations[s.player].tech=9;assert.throws(()=>engine.restore(s));
+  const bad=engine.fresh('early');bad.regions.anatolia.army='many';assert.throws(()=>engine.restore(bad));
+  const a=engine.fresh('classical'),b=engine.restore(a);engine.nextTurn(a);engine.nextTurn(b);assert.deepEqual(a,b);
+});
+test('long simulations preserve bounded resources and valid ownership',()=>{
+  for(const scenario of catalog.scenarios){
+    const s=engine.fresh(scenario.id);
+    for(let i=0;i<100&&!s.over;i++){
+      engine.nextTurn(s);
+      for(const n of Object.values(s.nations)){assert.ok(Number.isFinite(n.gold)&&n.gold>=0);assert.ok(Number.isFinite(n.food)&&n.food>=0);assert.ok(n.tech<=engine.eraAt(s.year));}
+      for(const p of Object.values(s.regions)){assert.ok(p.army>=1);assert.ok(p.stability>=0&&p.stability<=100);assert.ok(Object.hasOwn(s.nations,p.owner));}
+    }
+  }
+});
+test('terminal saves retain completed status and cannot issue orders',()=>{
+  const s=engine.fresh('contemporary');s.year=2024;engine.nextTurn(s);
+  assert.equal(s.over,true);const restored=engine.restore(s);assert.equal(restored.over,true);
+  assert.equal(engine.action(restored,'develop').ok,false);
+});
 class Element {
-  children=[];attributes={};value='';disabled=false;hidden=false;textContent='';
+  children=[];attributes={};style={};value='';disabled=false;hidden=false;textContent='';
   classList={toggle(){},add(){},remove(){}};
   setAttribute(k,v){this.attributes[k]=v}
   append(...items){this.children.push(...items);if(!this.value&&items[0]?.value)this.value=items[0].value}
   replaceChildren(...items){this.children=[];this.value='';this.append(...items)}
   get options(){return this.children}
+  get selectedOptions(){return this.children.filter(c=>c.value===this.value)}
 }
-for(const storageMode of ['normal','blocked','corrupt'])test('game UI renders and responds with '+storageMode+' storage',()=>{
-  const nodes=new Map([...html.split('<script')[0].matchAll(/\bid="([^"]+)"/g)].map(m=>['#'+m[1],new Element()]));
-  let saved=storageMode==='corrupt'?'{broken':null;
-  const context={document:{createElementNS:()=>new Element(),createElement:()=>new Element()},$:id=>{assert.ok(nodes.has(id),'unknown ID '+id);return nodes.get(id)},localStorage:{getItem(){if(storageMode==='blocked')throw Error('denied');return saved},setItem(k,v){if(storageMode==='blocked')throw Error('denied');saved=v}}};
-  const ui=html.split('// STRATEGY_ENGINE_END')[1].split('  call("get_musewave_account").catch')[0];
-  vm.runInNewContext(data+engine+ui,context);
-  assert.equal(nodes.get('#g-gold').textContent,'180');
-  nodes.get('#g-recruit').onclick();assert.equal(nodes.get('#g-gold').textContent,'145');
-  nodes.get('#end-turn').onclick();assert.match(nodes.get('#game-turn').textContent,/Verano/);
-  assert.equal(nodes.get('#world-map').children.filter(x=>x.attributes.role==='button').length,16);
-  if(storageMode==='corrupt')assert.equal(saved,'{broken');
+for(const mode of ['normal','blocked','corrupt'])test('UI is usable with '+mode+' storage and confirms scenario replacement',()=>{
+  const nodes=new Map([...html().split('<script')[0].matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
+  const saves=new Map([['musewave-dominion-v3','legacy campaign'],['musewave-human-history-v4',mode==='corrupt'?'{broken':null]]);
+  const context={HISTORY_CATALOG:catalog,EARTH_PATHS,createHistoryEngine,
+    document:{getElementById:id=>{assert.ok(nodes.has(id),'Missing element '+id);return nodes.get(id)},createElementNS:()=>new Element(),createElement:()=>new Element(),createTextNode:text=>({textContent:text})},
+    localStorage:{getItem(k){if(mode==='blocked')throw Error('denied');return saves.get(k)},setItem(k,v){if(mode==='blocked')throw Error('denied');saves.set(k,v)}}};
+  vm.runInNewContext(readFileSync(new URL('../src/history-ui.js',import.meta.url),'utf8'),context);
+  assert.equal(nodes.get('history-date').textContent,'1444 CE');
+  nodes.get('history-recruit').onclick();assert.equal(nodes.get('history-treasury').textContent,'185');
+  nodes.get('history-end-turn').onclick();assert.equal(nodes.get('history-date').textContent,'1450 CE');
+  nodes.get('history-scenario').value='origins';nodes.get('history-scenario').onchange();
+  assert.equal(nodes.get('history-date').textContent,'1450 CE');
+  nodes.get('history-start').onclick();assert.equal(nodes.get('history-confirm-box').hidden,false);
+  nodes.get('history-cancel').onclick();assert.equal(nodes.get('history-date').textContent,'1450 CE');
+  nodes.get('history-start').onclick();nodes.get('history-confirm').onclick();assert.equal(nodes.get('history-date').textContent,'10000 BCE');
+  assert.equal(saves.get('musewave-dominion-v3'),'legacy campaign');
 });
