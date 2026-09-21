@@ -81,10 +81,10 @@
     const s=historyState,svg=el("history-map");svg.replaceChildren();
     const width=1080/historyZoom,height=480/historyZoom;
     svg.setAttribute("viewBox",[Math.max(0,Math.min(1080-width,historyCenter[0]-width/2)),Math.max(0,Math.min(480-height,historyCenter[1]-height/2)),width,height].join(" "));
-    svg.append(node("rect",{width:1080,height:540,fill:"#0f2531"}));
+    svg.append(node("rect",{width:1080,height:540,fill:"#edf3f8"}));
     for(let x=0;x<=1080;x+=90)svg.append(node("path",{d:"M"+x+" 0V540",stroke:"#5b8b9c","stroke-width":.5,opacity:.2}));
     for(let y=0;y<=540;y+=90)svg.append(node("path",{d:"M0 "+y+"H1080",stroke:"#5b8b9c","stroke-width":.5,opacity:.2}));
-    const land=node("g",{"pointer-events":"none",fill:"#374d4c",stroke:"#70817b","stroke-width":.5});
+    const land=node("g",{"pointer-events":"none",fill:"#d4dfd8",stroke:"#b4c4bc","stroke-width":.6});
     for(const d of EARTH_PATHS)land.append(node("path",{d}));svg.append(land);
     const source=s.regions[s.source],selected=s.regions[s.target]||source,linked=source?historyEngine.routes(s,source.id,s.player):[],supplied=historyEngine.supply(s,s.player);
     if(source)for(const link of linked){
@@ -99,14 +99,14 @@
       if(historyMode==="supply")color=p.owner===s.player?(supplied.has(p.id)?"#64c4a3":"#e98a75"):"#75848a";
       const group=node("g",{role:"button",tabindex:0,"aria-label":p.name+", "+s.nations[p.owner].name,"class":"history-center"});
       group.setAttribute("aria-pressed",String(isSelected));
-      if(p.owner===s.player)group.append(node("circle",{cx:x,cy:y,r:12,fill:"none",stroke:"#e2c987","stroke-width":1,opacity:.7}));
-      group.append(node("circle",{cx:x,cy:y,r:isSelected?9:6,fill:color,stroke:isSelected?"#fff2c7":"#10232c","stroke-width":isSelected?2:1}));
+      if(p.owner===s.player)group.append(node("circle",{cx:x,cy:y,r:13,fill:"#0071e312",stroke:"#0071e3","stroke-width":1,opacity:.8}));
+      group.append(node("circle",{cx:x,cy:y,r:isSelected?9:6,fill:color,stroke:isSelected?"#0071e3":"#ffffff","stroke-width":isSelected?2.5:1.5}));
       group.append(node("circle",{cx:x,cy:y,r:11,fill:"transparent"}));
       group.append(node("title",{},p.name+" · "+s.nations[p.owner].name+" · "+p.army+" formations"));
       group.onclick=()=>selectCenter(p.id);group.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selectCenter(p.id)}};
       svg.append(group);
       if(isSelected||p.owner===s.player||historyZoom>=2.5){
-        svg.append(node("text",{x:x+12,y:y-10,fill:"#f6edda","font-size":historyZoom>=2.5?6:11,"font-weight":700,"paint-order":"stroke",stroke:"#0f2531","stroke-width":2,"pointer-events":"none"},p.name));
+        svg.append(node("text",{x:x+12,y:y-10,fill:"#34473e","font-size":historyZoom>=2.5?6:11,"font-weight":600,"paint-order":"stroke",stroke:"#edf3f8","stroke-width":3,"pointer-events":"none"},p.name));
       }
     }
     const legend=el("history-legend");legend.replaceChildren();
