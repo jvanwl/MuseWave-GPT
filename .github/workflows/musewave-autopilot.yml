@@ -1,0 +1,70 @@
+name: MuseWave Autopilot
+on:
+  schedule:
+    - cron: '23 13 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: musewave-autopilot
+  cancel-in-progress: false
+jobs:
+  improve:
+    if: vars.AUTOPILOT_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Avoid overlapping proposals
+        id: pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --json headRefName --jq '[.[] | select(.headRefName | startswith("autopilot/"))] | length')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+      - name: Generate one bounded improvement
+        if: steps.pending.outputs.count == '0'
+        env:
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          AI_API_URL: ${{ vars.AI_API_URL }}
+          AI_MODEL: ${{ vars.AI_MODEL }}
+        run: node scripts/autopilot.mjs generate
+      - name: Apply candidate and rebuild bundle
+        if: steps.pending.outputs.count == '0'
+        run: |
+          node scripts/autopilot.mjs apply
+          node scripts/build-history.mjs
+      - name: Test candidate without credentials or network access
+        if: steps.pending.outputs.count == '0'
+        run: |
+          mkdir -p /tmp/musewave-candidate
+          git archive HEAD | tar -x -C /tmp/musewave-candidate
+          cp src/history-ui.js src/history-engine.mjs /tmp/musewave-candidate/src/
+          cp public/music-studio.html /tmp/musewave-candidate/public/
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --pids-limit 128 --memory 512m --cpus 1 --user 65534:65534 --tmpfs /tmp:rw,noexec,nosuid,size=32m -v /tmp/musewave-candidate:/work:ro -w /work node:22 node --test
+      - name: Publish passing candidate as a review request
+        if: steps.pending.outputs.count == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo 'No change; nothing to publish.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          branch="autopilot/run-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git switch -c "$branch"
+          git config user.name 'MuseWave Autopilot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/history-ui.js src/history-engine.mjs public/music-studio.html
+          git commit -m 'feat: propose tested automatic game improvement'
+          gh auth setup-git
+          git push origin "$branch"
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --title 'Autopilot: tested game improvement' --body-file .autopilot/review.md >> "$GITHUB_STEP_SUMMARY"
