@@ -13,9 +13,11 @@ import { canSpend, exportTrainingExamples, getAccount, getLearningStatus, listPr
 const PORT = Number(process.env.PORT || 8787);
 const ENGINE_URL = (process.env.MUSEWAVE_ENGINE_URL || "").replace(/\/$/, "");
 const ENGINE_TOKEN = process.env.MUSEWAVE_ENGINE_TOKEN || "";
-const UI_URI = "ui://musewave/studio.html";
+const UI_URI = "ui://nexus/sovereign.html";
 const MAX_JSON_BYTES = 64 * 1024;
-const widgetHtml = readFileSync(new URL("./public/music-studio.html", import.meta.url), "utf8");
+const widgetHtml = readFileSync(new URL("./public/sovereign-ai.html", import.meta.url), "utf8");
+const NEXUS_MODEL_URL = (process.env.NEXUS_MODEL_URL || "").replace(/\/$/, "");
+const NEXUS_MODEL_TOKEN = process.env.NEXUS_MODEL_TOKEN || "";
 
 const projectSchema = z.object({
   id: z.string(), title: z.string(), prompt: z.string(), genre: z.string(), mood: z.string(),
@@ -38,6 +40,7 @@ const conceptInputSchema = z.object({
 const consentSchema = z.object({ enabled: z.boolean() }).strict();
 const feedbackSchema = z.object({ projectId: z.string().min(1).max(120), rating: z.number().int().min(1).max(5), tags: z.array(z.string().max(30)).max(8).default([]) }).strict();
 const checkoutSchema = z.object({ planId: z.enum(["creator", "pro", "studio"]) }).strict();
+const sovereignInputSchema = z.object({ prompt:z.string().min(2).max(6000), mode:z.enum(["strategist","builder","repair","revenue","research"]).default("strategist") }).strict();
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 
@@ -114,6 +117,31 @@ function createConcept(input) {
   const project = buildConcept(input, cost);
   saveProject(project, cost, !FREE_BETA);
   return { project, account: accountPayload() };
+}
+
+function localSovereign(input) {
+  const focus={strategist:"Turn the objective into a measurable strategy",builder:"Design a buildable system with a small first release",repair:"Diagnose the failure before changing code",revenue:"Find an ethical path to validated customer revenue",research:"Separate known facts, assumptions and evidence needed"}[input.mode];
+  const plans={strategist:["Define the result and deadline","List constraints and available assets","Run the smallest reversible experiment","Measure the outcome and decide the next iteration"],builder:["Specify the user and core workflow","Choose the minimum architecture","Build and test one vertical slice","Review security, cost and deployment before release"],repair:["Reproduce the problem","Collect logs and isolate the failing boundary","Prepare the smallest patch with regression tests","Deploy only after review and rollback planning"],revenue:["Name the paying customer and urgent problem","Validate demand before building","Offer one clear paid outcome","Track acquisition cost, conversion and retention"],research:["State the decision the research must support","Gather primary evidence","Compare competing explanations","Document uncertainty and recommend a reversible next step"]}[input.mode];
+  return `${focus}.\n\nObjective understood: ${input.prompt}\n\nPlan:\n${plans.map((x,i)=>`${i+1}. ${x}`).join("\n")}\n\nI will not claim guaranteed profit or execute external changes without your approval. The next useful step is to complete item 1 with concrete evidence.`;
+}
+
+async function askSovereign(input) {
+  let response=localSovereign(input),providerConfigured=Boolean(NEXUS_MODEL_URL);
+  if(providerConfigured){
+    const request=await fetch(`${NEXUS_MODEL_URL}/v1/chat/completions`,{method:"POST",headers:{"content-type":"application/json",...(NEXUS_MODEL_TOKEN?{authorization:`Bearer ${NEXUS_MODEL_TOKEN}`}:{})},body:JSON.stringify({model:process.env.NEXUS_MODEL||"default",temperature:.3,max_tokens:1200,messages:[{role:"system",content:"You are NEXUS, an owner-controlled AI copilot. Help create, repair, research and design ethical revenue strategies. Never claim guaranteed income. Never imply an external action happened unless a tool confirms it. Code changes, deployments, purchases, credentials and financial actions require explicit owner approval."},{role:"user",content:`Mode: ${input.mode}\nObjective: ${input.prompt}`}]}) ,signal:AbortSignal.timeout(60_000)});
+    if(!request.ok)throw new Error(`Model provider returned ${request.status}`);
+    const data=await request.json();response=String(data.choices?.[0]?.message?.content||"").slice(0,12000)||response;
+  }
+  const needsApproval=["builder","repair","revenue"].includes(input.mode);
+  return {response,mode:input.mode,providerConfigured,proposal:needsApproval?{id:`nx_${Date.now().toString(36)}`,title:input.mode==="repair"?"Review proposed repair":input.mode==="builder"?"Review proposed build":"Review revenue experiment",detail:"Approval records intent only. External execution requires a connected, authorized provider."}:null};
+}
+
+function createSovereignServer(){
+  const server=new McpServer({name:"nexus-sovereign",version:"1.0.0"});
+  registerAppResource(server,"nexus-sovereign",UI_URI,{},async()=>({contents:[{uri:UI_URI,mimeType:RESOURCE_MIME_TYPE,text:widgetHtml}]}));
+  registerAppTool(server,"open_nexus",{title:"Open NEXUS Sovereign",description:"Open the owner-controlled AI command center.",inputSchema:{},_meta:{ui:{resourceUri:UI_URI}}},async()=>({content:[{type:"text",text:"NEXUS Sovereign is ready."}],structuredContent:{providerConfigured:Boolean(NEXUS_MODEL_URL)}}));
+  registerAppTool(server,"ask_nexus",{title:"Ask NEXUS",description:"Analyze an objective and return a controlled plan. External actions always require owner approval.",inputSchema:sovereignInputSchema.shape,_meta:{ui:{resourceUri:UI_URI}}},async input=>{try{const result=await askSovereign(input);return{content:[{type:"text",text:result.response}],structuredContent:result}}catch(error){return{isError:true,content:[{type:"text",text:error.message}]}}});
+  return server;
 }
 
 function createMuseWaveServer() {
@@ -195,8 +223,10 @@ export function createHttpServer() { return createServer(async (req, res) => {
     return;
   }
   if (req.method === "GET" && req.url === "/favicon.ico") { res.writeHead(204); res.end(); return; }
-  if (req.method === "GET" && req.url === "/health") { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ ok: true, name: "musewave-gpt", version: "0.3.0", freeBeta: FREE_BETA })); return; }
+  if (req.method === "GET" && req.url === "/health") { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ ok: true, name: "nexus-sovereign", version: "1.0.0", providerConfigured:Boolean(NEXUS_MODEL_URL) })); return; }
   try {
+    if(req.method==="GET"&&req.url==="/api/ai/status")return json(res,200,{ready:true,providerConfigured:Boolean(NEXUS_MODEL_URL),approvalRequired:true});
+    if(req.method==="POST"&&req.url==="/api/ai/ask")return json(res,200,await askSovereign(await validatedJson(req,sovereignInputSchema)));
     if (req.method === "GET" && req.url === "/api/bootstrap") return json(res, 200, { structuredContent: { account: accountPayload(), projects: listProjects(), plans: Object.values(PLANS) } });
     if (req.method === "GET" && req.url === "/api/projects") return json(res, 200, { structuredContent: { projects: listProjects(), account: accountPayload() } });
     if (req.method === "GET" && req.url === "/api/learning") return json(res, 200, { structuredContent: { learning: getLearningStatus(), profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } });
@@ -223,14 +253,14 @@ export function createHttpServer() { return createServer(async (req, res) => {
   if (req.url === "/mcp") {
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on("close", () => transport.close());
-    const server = createMuseWaveServer(); await server.connect(transport); await transport.handleRequest(req, res); return;
+    const server = createSovereignServer(); await server.connect(transport); await transport.handleRequest(req, res); return;
   }
   res.writeHead(404, { "content-type": "application/json" }); res.end(JSON.stringify({ error: "Not found" }));
 }); }
 
 export function startServer(port = PORT) {
   const httpServer = createHttpServer();
-  httpServer.listen(port, () => console.log(`MuseWave GPT v0.3 listening on http://localhost:${port}/mcp`));
+  httpServer.listen(port, () => console.log(`NEXUS Sovereign v1.0 listening on http://localhost:${port}/mcp`));
   const close = () => httpServer.close(() => process.exit(0));
   process.once("SIGTERM", close); process.once("SIGINT", close);
   return httpServer;

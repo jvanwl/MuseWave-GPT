@@ -1,9 +1,9 @@
 {
-  "name": "chrona-dominion",
-  "version": "1.1.0",
+  "name": "nexus-sovereign",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "An AI-assisted civilization simulator spanning every era of human history.",
+  "description": "An owner-controlled AI workspace for creation, repair, research and revenue strategy.",
   "scripts": {
     "dev": "node --watch server.mjs",
     "start": "node server.mjs",

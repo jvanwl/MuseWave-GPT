@@ -4,30 +4,23 @@ import { readFileSync } from "node:fs";
 import { once } from "node:events";
 import { createHttpServer } from "../server.mjs";
 
-test("widget contains the MCP Apps bridge and Chrona Dominion game", () => {
-  const html = readFileSync(new URL("../public/music-studio.html", import.meta.url), "utf8");
-  assert.match(html, /ui\/initialize/);
-  assert.match(html, /tools\/call/);
-  assert.match(html, /create_music_concept/);
-  assert.match(html, /Monetization-ready beta/);
-  assert.match(html, /start_plan_checkout/);
-  assert.match(html, /Chrona Dominion/);
-  assert.match(html, /HISTORY_CATALOG/);
-  assert.match(html, /createHistoryEngine/);
-  assert.match(html, /Negotiate armistice/);
+test("widget is a focused owner-controlled NEXUS workspace", () => {
+  const html = readFileSync(new URL("../public/sovereign-ai.html", import.meta.url), "utf8");
+  assert.match(html, /NEXUS Sovereign/);
+  assert.match(html, /\/api\/ai\/ask/);
+  assert.match(html, /APPROVAL QUEUE/);
+  assert.match(html, /Owner-controlled autonomy/);
+  assert.doesNotMatch(html, /Chrona Dominion/);
 });
 
 test("server exposes the MCP endpoint and UI resource", () => {
   const server = readFileSync(new URL("../server.mjs", import.meta.url), "utf8");
-  assert.match(server, /ui:\/\/musewave\/studio\.html/);
+  assert.match(server, /ui:\/\/nexus\/sovereign\.html/);
   assert.match(server, /req\.url === "\/mcp"/);
   assert.match(server, /registerAppTool/);
-  assert.match(server, /get_musewave_account/);
-  assert.match(server, /list_music_projects/);
-  assert.match(server, /rate_music_project/);
-  assert.match(server, /set_personalization_consent/);
-  assert.match(server, /MUSEWAVE_ENGINE_URL/);
-  assert.match(server, /\/api\/engine\/generate/);
+  assert.match(server, /open_nexus/);
+  assert.match(server, /ask_nexus/);
+  assert.match(server, /NEXUS_MODEL_URL/);
 });
 
 test("HTTP API validates JSON, limits payloads, and sets security headers", async (t) => {
@@ -40,6 +33,14 @@ test("HTTP API validates JSON, limits payloads, and sets security headers", asyn
   assert.equal(health.status, 200);
   assert.equal(health.headers.get("x-content-type-options"), "nosniff");
   assert.equal(health.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=()");
+
+  const status = await fetch(`${base}/api/ai/status`);
+  assert.equal(status.status, 200);
+  assert.equal((await status.json()).approvalRequired, true);
+
+  const answer = await fetch(`${base}/api/ai/ask`, { method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify({prompt:"Create a small paid software product",mode:"revenue"}) });
+  assert.equal(answer.status, 200);
+  const result=await answer.json();assert.match(result.response,/Plan:/);assert.ok(result.proposal);
 
   const wrongType = await fetch(`${base}/api/concepts`, { method: "POST", body: "{}" });
   assert.equal(wrongType.status, 415);
