@@ -4,14 +4,14 @@ import { readFileSync } from "node:fs";
 import { once } from "node:events";
 import { createHttpServer } from "../server.mjs";
 
-test("widget contains the MCP Apps bridge and Epoch Atlas game", () => {
+test("widget contains the MCP Apps bridge and Chrona Dominion game", () => {
   const html = readFileSync(new URL("../public/music-studio.html", import.meta.url), "utf8");
   assert.match(html, /ui\/initialize/);
   assert.match(html, /tools\/call/);
   assert.match(html, /create_music_concept/);
-  assert.match(html, /All eras unlocked in beta/);
+  assert.match(html, /Monetization-ready beta/);
   assert.match(html, /start_plan_checkout/);
-  assert.match(html, /Epoch Atlas/);
+  assert.match(html, /Chrona Dominion/);
   assert.match(html, /HISTORY_CATALOG/);
   assert.match(html, /createHistoryEngine/);
   assert.match(html, /Negotiate armistice/);

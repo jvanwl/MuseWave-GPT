@@ -46,6 +46,13 @@ test('unaffordable and foreign orders leave state unchanged',()=>{
   assert.equal(engine.action(s,'recruit',{source:'france'}).ok,false);
   assert.equal(JSON.stringify(s),before);
 });
+test('economic extraction, repairs and diplomatic communication have bounded effects',()=>{
+  const s=engine.fresh('classical','persian'),p=s.regions[s.source],gold=s.nations[s.player].gold,stability=p.stability;
+  assert.equal(engine.action(s,'mine').ok,true);assert.ok(s.nations[s.player].gold>gold);assert.ok(p.stability<stability);
+  p.acted=false;p.fort=0;assert.equal(engine.action(s,'repair').ok,true);assert.equal(p.fort,1);
+  const foreign=engine.routes(s,p.id,s.player).map(x=>s.regions[x.id]).find(x=>x.owner!==s.player);assert.ok(foreign);s.target=foreign.id;
+  const weariness=s.nations[s.player].weariness=20;assert.equal(engine.action(s,'envoy').ok,true);assert.ok(s.nations[s.player].weariness<weariness);
+});
 test('attacks require declaration, route and uncommitted forces',()=>{
   const s=engine.fresh('early');
   assert.equal(engine.action(s,'attack',{target:'levant'}).ok,false);

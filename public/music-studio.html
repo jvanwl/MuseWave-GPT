@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Epoch Atlas — Rewrite Human History</title>
+  <title>Chrona Dominion — AI Civilization Simulator</title>
   <style>
     :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;--bg:#08090d;--panel:#11131a;--panel2:#171923;--line:#292c38;--text:#f7f5fb;--muted:#989aaa;--pink:#ff5e9d;--violet:#8b7cff;--cyan:#54d6d0}
     *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% -15%,#34204e 0,transparent 32%),var(--bg);color:var(--text);min-height:100vh}button,input,select,textarea{font:inherit}.app{display:grid;grid-template-columns:190px 1fr;min-height:100vh}
@@ -143,11 +143,12 @@
     #game-view .world-intelligence{margin-top:18px;padding:22px}#game-view .world-intelligence-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px}#game-view .world-intelligence-head h3{margin:5px 0 0;font-size:22px}#game-view .world-pulse{font-size:11px;color:#6e6e73;text-align:right}
     #game-view .power-table{width:100%;border-collapse:collapse}#game-view .power-table th,#game-view .power-table td{padding:11px 9px;border-bottom:1px solid #eeeef2;text-align:left;font-size:11px}#game-view .power-table th{color:#77777e;font-weight:600;text-transform:uppercase;letter-spacing:.07em;font-size:9px}#game-view .power-table tr.is-player{background:#edf5ff}#game-view .power-table button{border:0;background:transparent;color:#0071e3;font:inherit;font-weight:600;cursor:pointer;padding:0;text-align:left}#game-view .rank-medal{font-weight:700;color:#1d1d1f}
     @media(max-width:700px){#game-view .world-intelligence{padding:16px;overflow:auto}#game-view .world-intelligence-head{align-items:flex-start;flex-direction:column}#game-view .world-pulse{text-align:left}.power-table{min-width:560px}}
+    #game-view .ai-director{background:linear-gradient(145deg,#f5f9ff,#fff);border-color:#cadcf2}#game-view .ai-orb{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#0071e3;color:#fff;font-weight:700;box-shadow:0 0 0 7px #0071e312;margin-bottom:15px}#game-view .ai-director select{margin-bottom:9px}#game-view .ai-director-status{padding:11px;border-radius:10px;background:#edf5ff;color:#34577e;font-size:11px;line-height:1.6;margin:10px 0}.ai-running .ai-orb{animation:aiPulse 1.2s ease-in-out infinite alternate}@keyframes aiPulse{to{box-shadow:0 0 0 14px #0071e309}}
   </style>
 </head>
 <body>
 <div class="app">
-  <aside><div class="brand"><span class="logo">E</span>Epoch Atlas<span class="beta">BETA</span></div><nav><button class="nav active" data-view="game">◎ World campaign</button></nav><div class="epoch-nav-note"><b>One world. Every era.</b>Your decisions create an alternate human history.</div><div class="usage"><div class="usage-head"><span>Campaign access</span><b>Free</b></div><div class="meter"><i style="width:100%"></i></div><small>All eras unlocked in beta</small></div></aside>
+  <aside><div class="brand"><span class="logo">C</span>Chrona Dominion<span class="beta">BETA</span></div><nav><button class="nav active" data-view="game">◎ World campaign</button></nav><div class="epoch-nav-note"><b>One world. Infinite outcomes.</b>Your AI-assisted decisions create an alternate human history.</div><div class="usage"><div class="usage-head"><span>Founder access</span><b>Free</b></div><div class="meter"><i style="width:100%"></i></div><small>Monetization-ready beta</small></div></aside>
   <main><header class="top"><h1 id="page-title">World command</h1><div class="top-actions"><span class="pill">Single-player simulation</span><button class="pill upgrade" data-go="game">Resume campaign</button></div></header>
     <section class="view" id="create-view"><div class="studio">
       <form class="card builder" id="studio-form"><div class="eyebrow">AI music studio</div><h2>Make your next <span style="color:#ff82b2">sound.</span></h2><p>Build an original track concept from a mood, story, or moment. No production experience needed.</p>
@@ -165,7 +166,7 @@
     <section class="view" id="library-view"><div class="section-head"><div><h2>My music</h2><p>Your recent concepts and generations.</p></div><button class="pill upgrade" data-go="create">+ New track</button></div><div class="projects" id="projects"><div class="card empty">Create your first track to start your library.</div></div></section>
     <section class="view" id="learning-view"><div class="section-head"><div><h2>MuseWave Intelligence</h2><p>A private preference network that improves from explicit feedback.</p></div></div><div class="learning-grid"><article class="card learn-card"><div class="brain">◎</div><h3>Learning you control</h3><p>MuseWave learns only from tracks you rate after opting in. It cannot read unrelated conversations, scrape the web, rewrite its code, or deploy itself.</p><label class="toggle"><span>Personalized learning</span><input id="learning-consent" type="checkbox"></label></article><article class="card learn-card"><div class="eyebrow">Model status</div><h3 id="model-state">Waiting for consent</h3><p id="model-copy">Enable learning and rate at least 10 tracks.</p><div class="learn-stats"><div class="learn-stat"><b id="feedback-count">0</b><span>Ratings</span></div><div class="learn-stat"><b id="model-confidence">0%</b><span>Confidence</span></div><div class="learn-stat"><b id="model-version">—</b><span>Model</span></div></div><p>Neural architecture: 23 music features → 32 neurons → 16 neurons → preference score. Models require evaluation before controlled promotion.</p></article></div></section>
     <section class="view active" id="game-view" lang="en">
-      <div class="dominion-heading"><div><div class="eyebrow">EPOCH ATLAS · LIVING WORLD STRATEGY</div><h2>Rewrite human history.</h2><p id="history-active-scenario"></p></div><div class="history-clock"><b id="history-date"></b><span id="history-era-now"></span></div></div>
+      <div class="dominion-heading"><div><div class="eyebrow">CHRONA DOMINION · AI CIVILIZATION SIMULATOR</div><h2>Build beyond history.</h2><p id="history-active-scenario"></p></div><div class="history-clock"><b id="history-date"></b><span id="history-era-now"></span></div></div>
       <details class="history-campaign"><summary>Choose an era or start a new campaign</summary><div class="card history-setup"><div><span class="eyebrow">CHOOSE YOUR STARTING POINT</span><h3>Ten eras. One world.</h3><p>Your current campaign is already playable. Use this panel to start somewhere else.</p></div><label>Historical scenario<select id="history-scenario"></select></label><label>Playable faction<select id="history-faction"></select></label><button class="end-turn" id="history-start">Start historical campaign</button><p id="history-setup-note"></p>
       <div id="history-confirm-box" hidden><p id="history-confirm-note"></p><button class="ghost" id="history-cancel">Keep current campaign</button><button class="end-turn" id="history-confirm">Confirm new campaign</button></div></div></details>
       <section class="history-brief card" aria-label="Turn guidance"><div><span class="eyebrow">YOUR NEXT MOVE</span><h3 id="history-advice-title"></h3><p id="history-advice"></p><button class="ghost" id="history-advice-action">Inspect priority center</button></div><div><span class="eyebrow">BEFORE YOU ADVANCE</span><p id="history-turn-preview"></p><p class="game-help">Choose a center → issue orders → advance time. Recruiting, moving or attacking uses that center’s mobilization for this turn.</p><button class="end-turn" id="history-next-top"></button></div></section>
@@ -190,9 +191,10 @@
             <div class="game-stat"><b id="history-treasury"></b><span>Treasury</span></div><div class="game-stat"><b id="history-balance"></b><span>Net / turn</span></div><div class="game-stat"><b id="history-food"></b><span>Provisions</span></div><div class="game-stat"><b id="history-forces"></b><span>Formations</span></div><div class="game-stat"><b id="history-science"></b><span>Knowledge</span></div><div class="game-stat"><b id="history-prosperity"></b><span>Prosperity</span></div>
           </div><p class="game-help" id="history-budget"></p><label>Tax policy<select id="history-tax"><option value="0.75">Low · stability first</option><option value="1">Normal · balanced</option><option value="1.35">High · unrest risk</option></select></label></div>
           <div class="card game-panel"><h3>Knowledge &amp; technology</h3><p id="history-tech"></p><p class="game-help" id="history-units"></p><p class="game-help" id="history-research-hint"></p><button class="ghost" id="history-research">Invest in research · 60 treasury</button><small id="history-research-reason" class="history-action-help"></small><details class="game-guide"><summary>Technology roadmap</summary><ol id="history-roadmap" class="history-roadmap"></ol></details></div>
+          <div class="card game-panel ai-director" id="history-ai-panel"><div class="ai-orb">AI</div><div class="eyebrow">SOVEREIGN DIRECTOR</div><h3>Controlled autonomy</h3><p class="game-help">The director acts only inside this campaign. Every action is logged and can be stopped instantly.</p><label>Operating mode<select id="history-ai-mode"><option value="advisor">Advisor · recommendations only</option><option value="builder">Builder · economy &amp; repairs</option><option value="governor">Governor · full domestic policy</option></select></label><label>Simulation clock<select id="history-ai-speed"><option value="0">Manual time</option><option value="1000">1 second ≈ one historical turn</option><option value="350">Hyperchron · thousands of years rapidly</option></select></label><div id="history-ai-director-status" aria-live="polite">Director standing by. You retain final control.</div><button class="end-turn" id="history-ai-toggle">Start AI Director</button></div>
           <div class="card game-panel history-command" id="history-command"><h3 id="history-selected-name">Center command</h3><label>Inspect a strategic center<select id="history-region-select"></select></label><div class="province-info" id="history-region-info"></div><p class="game-help" id="history-orders-source"></p><p class="game-help" id="history-local-feedback"></p><button class="ghost" id="history-select-source">Return to your selected center</button><h4>Local development</h4><div class="game-actions">
-            <button id="history-recruit">Recruit 4 formations · 35 + 12 provisions</button><button id="history-develop">Develop infrastructure · 60</button><button id="history-fortify">Fortify · 55</button><button id="history-relief">Civilian relief · 25 + 15 provisions</button>
-            <label>Transfer half your available forces to<select id="history-move-target"></select></label><button id="history-move">Transfer forces</button><h4>Diplomacy &amp; military</h4><button id="history-war">Declare war on selected faction</button><button id="history-peace">Negotiate armistice · 40</button><button id="history-trade">Sign trade agreement · 30</button><button id="history-attack">Attack selected center</button>
+            <button id="history-recruit">Recruit 4 formations · 35 + 12 provisions</button><button id="history-develop">Create infrastructure · 60</button><button id="history-fortify">Fortify · 55</button><button id="history-relief">Civilian relief · 25 + 15 provisions</button><button id="history-mine">Mine local resources</button><button id="history-repair">Repair systems · 35</button>
+            <label>Transfer half your available forces to<select id="history-move-target"></select></label><button id="history-move">Transfer forces</button><h4>Diplomacy &amp; military</h4><button id="history-envoy">Open diplomatic channel · 15</button><button id="history-war">Declare war on selected faction</button><button id="history-peace">Negotiate armistice · 40</button><button id="history-trade">Sign trade agreement · 30</button><button id="history-attack">Attack selected center</button>
           </div></div>
           <div id="history-result" class="history-result" hidden></div><button class="end-turn" id="history-end-turn"></button><small id="history-save"></small>
         </aside>
@@ -209,7 +211,7 @@
   const rest={get_musewave_account:["GET","/api/bootstrap"],list_music_projects:["GET","/api/projects"],get_learning_status:["GET","/api/learning"],create_music_concept:["POST","/api/concepts"],set_personalization_consent:["POST","/api/learning/consent"],rate_music_project:["POST","/api/feedback"],start_plan_checkout:["POST","/api/checkout"]};
   async function call(name,args={}){await bridgeReady;let result;if(embedded){result=await request("tools/call",{name,arguments:args})}else{const [method,url]=rest[name]||[];if(!url)throw new Error(`Unsupported action: ${name}`);const response=await fetch(url,{method,headers:method==="POST"?{"content-type":"application/json"}:undefined,body:method==="POST"?JSON.stringify(args):undefined});result=await response.json();if(!response.ok)throw new Error(result.error||"Request failed")}sync(result?.structuredContent);return result}
   function sync(data={}){if(data.account){state.account=data.account;$("#credits").textContent=data.account.freeBeta?"∞":data.account.creditsRemaining;$("#plan-pill").textContent=`${data.account.plan.name} plan`;$("#usage-copy").textContent=data.account.freeBeta?`Free beta · ${data.account.creditsUsed} credits simulated`:`${data.account.creditsUsed} used`;if(data.account.learning)renderLearning(data.account.learning,data.profile)}if(data.learning)renderLearning(data.learning,data.profile);if(data.plans){state.plans=data.plans;renderPlans()}if(data.projects){state.projects=data.projects;renderProjects()}if(data.project){state.project=data.project;if(!state.projects.find(p=>p.id===data.project.id))state.projects.unshift(data.project);renderTrack(data.project);renderProjects()}}
-  function go(view){$$(".view,.nav").forEach(x=>x.classList.remove("active"));$("#"+view+"-view").classList.add("active");document.querySelector(`[data-view="${view}"]`)?.classList.add("active");$("#page-title").textContent={create:"Legacy music lab",library:"Legacy library",game:"World command",learning:"Legacy learning",pricing:"Legacy plans"}[view]}
+  function go(view){$$(".view,.nav").forEach(x=>x.classList.remove("active"));$("#"+view+"-view").classList.add("active");document.querySelector(`[data-view="${view}"]`)?.classList.add("active");$("#page-title").textContent={create:"Legacy music lab",library:"Legacy library",game:"Chrona command",learning:"Legacy learning",pricing:"Legacy plans"}[view]}
   $$(".nav").forEach(b=>b.onclick=()=>{go(b.dataset.view);if(b.dataset.view==="library")call("list_music_projects");if(b.dataset.view==="learning")call("get_learning_status");if(b.dataset.view==="pricing")call("get_musewave_account")});$$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   for(let i=0;i<38;i++){const b=document.createElement("i");b.style.setProperty("--h",`${10+(i*23)%31}px`);b.style.setProperty("--n",i);$("#wave").append(b)}
   const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;function cost(){const d=Number($("#duration").value),q=$("#quality").value==="studio"?2:1,v=document.querySelector('[name="mode"]:checked').value==="vocal"?1:0;const c=Math.max(1,Math.ceil(d/60))*q+v;$("#cost").textContent=`${c} credit${c===1?"":"s"}`;return c}["duration","quality"].forEach(id=>$("#"+id).onchange=cost);$$('[name="mode"]').forEach(x=>x.onchange=cost);$("#energy").oninput=e=>$("#energy-value").textContent=`${e.target.value} / 5`;
@@ -1538,7 +1540,7 @@ function createHistoryEngine(catalog) {
       if(n.science>=cost){n.science-=cost;n.tech++;log(s,n.name+" adopted "+eras[n.tech].unlock+".")}
       finish(s);return {ok:true};
     }
-    if(["war","peace","trade"].includes(type)){
+    if(["war","peace","trade","envoy"].includes(type)){
       if(!d||d.owner===actor)return fail("Select another faction.");
       if(type!=="peace"&&!contact(s,actor,d.owner))return fail("No contact route. Research navigation before transoceanic diplomacy.");
       const k=key(actor,d.owner);
@@ -1551,10 +1553,14 @@ function createHistoryEngine(catalog) {
         if(!s.wars[k])return fail("There is no war to settle.");
         if(n.gold<40)return fail("An armistice costs 40 treasury.");
         n.gold-=40;delete s.wars[k];s.truces[k]=s.turn+5;log(s,"Five-turn armistice: "+n.name+" / "+s.nations[d.owner].name+".");
-      }else{
+      }else if(type==="trade"){
         if(s.wars[k]||s.treaties[k])return fail("Trade requires peace and no existing pact.");
         if(n.gold<30)return fail("A trade pact costs 30 treasury.");
         n.gold-=30;s.treaties[k]=true;log(s,"Trade agreement: "+n.name+" / "+s.nations[d.owner].name+".");
+      }else{
+        if(n.gold<15)return fail("A diplomatic mission requires 15 treasury.");
+        n.gold-=15;n.weariness=clamp(n.weariness-8,0,90);lands(s,d.owner).forEach(p=>p.stability=clamp(p.stability+2,0,100));
+        log(s,n.name+" opened a diplomatic channel with "+s.nations[d.owner].name+".");
       }
       return {ok:true};
     }
@@ -1575,6 +1581,16 @@ function createHistoryEngine(catalog) {
     }else if(type==="relief"){
       if(n.gold<25||n.food<15)return fail("Requires 25 treasury and 15 provisions.");
       n.gold-=25;n.food-=15;p.stability=clamp(p.stability+15,0,100);p.morale=clamp(p.morale+8,20,100);
+    }else if(type==="mine"){
+      if(p.acted)return fail("This center has already mobilized this turn.");
+      if(n.tech<2)return fail("Mining requires metalworking technology.");
+      const yieldAmount=18+p.economy*4+(p.terrain==="hill"?18:p.terrain==="desert"?8:0);n.gold+=yieldAmount;p.stability=clamp(p.stability-5,0,100);p.acted=true;
+      log(s,p.name+" extracted resources worth "+yieldAmount+" treasury; local stability fell by 5.");
+    }else if(type==="repair"){
+      if(n.gold<35)return fail("Repairs require 35 treasury.");
+      if(p.fort>=3&&p.stability>=90)return fail("This center does not need repairs.");
+      n.gold-=35;p.fort=clamp(p.fort+1,0,3);p.stability=clamp(p.stability+8,0,100);p.morale=clamp(p.morale+5,20,100);
+      log(s,p.name+" repaired defenses and civic infrastructure.");
     }else if(type==="move"||type==="attack"){
       if(!d||!routes(s,p.id,actor).some(link=>link.id===d.id))return fail("No available route. Some sea routes require later technology.");
       if(p.acted||p.army<2)return fail("No uncommitted forces.");
@@ -1682,7 +1698,7 @@ function createHistoryEngine(catalog) {
   const scenario=()=>HISTORY_CATALOG.scenarios.find(x=>x.id===historyState.scenario);
   const factionColor=id=>{const index=scenario().factions.findIndex(f=>f[0]===id);return index<0?"#9a9e9a":palette[index%palette.length]};
   const terrainColor={hill:"#ab9580",forest:"#688c72",plain:"#b4b071",river:"#66acb1",coast:"#87b4cc",desert:"#d0b280"};
-  const orderHelp={recruit:"Adds 4 formations; uses mobilization, 200 inhabitants and 3 morale.",develop:"Adds 1 infrastructure level, improving income and provisions.",fortify:"Adds 1 defense level; each level multiplies defensive strength by +25% of its base.",relief:"Restores up to 15 stability and 8 morale.",move:"Moves half of the available force, leaving a garrison; both centers mobilize.",war:"Ends trade with this faction and adds 8 war weariness. Attacks become available.",peace:"Stops this war and prevents a new declaration for 5 turns.",trade:"Adds 8 treasury income per turn while both partners hold territory and remain at peace.",attack:"Commits all but one formation. Terrain, morale, technology and supplies affect the outcome.",research:"Invests 60 treasury for 30 knowledge; at most once per turn."};
+  const orderHelp={recruit:"Adds 4 formations; uses mobilization, 200 inhabitants and 3 morale.",develop:"Creates infrastructure, improving income and provisions.",fortify:"Adds 1 defense level; each level multiplies defensive strength by +25% of its base.",relief:"Restores up to 15 stability and 8 morale.",mine:"Extracts treasury from local resources, uses mobilization and reduces stability.",repair:"Repairs defenses and civic systems while improving morale.",move:"Moves half of the available force, leaving a garrison; both centers mobilize.",war:"Ends trade with this faction and adds 8 war weariness. Attacks become available.",peace:"Stops this war and prevents a new declaration for 5 turns.",trade:"Adds 8 treasury income per turn while both partners hold territory and remain at peace.",envoy:"Opens a communication channel, reducing war weariness and improving foreign stability.",attack:"Commits all but one formation. Terrain, morale, technology and supplies affect the outcome.",research:"Invests 60 treasury for 30 knowledge; at most once per turn."};
   const reasonNodes={};
   for(const type of Object.keys(orderHelp)){
     const reason=type==="research"?el("history-research-reason"):document.createElement("small");
@@ -1692,7 +1708,7 @@ function createHistoryEngine(catalog) {
   let priorityCenter=null;
   function renderCommandHelp(){
     for(const type of Object.keys(orderHelp)){
-      const local=["recruit","develop","fortify","relief","move"].includes(type);
+      const local=["recruit","develop","fortify","relief","mine","repair","move"].includes(type);
       const preview=local&&historyState.target?{ok:false,message:"Select one of your own centers to issue this order."}:historyEngine.action(JSON.parse(JSON.stringify(historyState)),type,type==="move"?{target:el("history-move-target").value}:{});
       el("history-"+type).disabled=!preview.ok;
       reasonNodes[type].textContent=preview.ok?orderHelp[type]:preview.message;
@@ -1849,7 +1865,7 @@ function createHistoryEngine(catalog) {
     if(historyState.regions[historyState.target]?.owner===historyState.player)historyState.target=null;
     renderHistory();
   }
-  for(const type of ["recruit","develop","fortify","relief","attack","war","peace","trade","research"])el("history-"+type).onclick=()=>historicalOrder(type);
+  for(const type of ["recruit","develop","fortify","relief","mine","repair","attack","war","peace","trade","envoy","research"])el("history-"+type).onclick=()=>historicalOrder(type);
   el("history-tax").onchange=e=>historicalOrder("tax",{value:Number(e.target.value)});
   el("history-move").onclick=()=>historicalOrder("move",{target:el("history-move-target").value});
   el("history-end-turn").onclick=()=>{const before=historyState.nations[historyState.player],snapshot={gold:before.gold,food:before.food,lands:historyEngine.lands(historyState,historyState.player).length};historyEngine.nextTurn(historyState);const after=historyState.nations[historyState.player],signed=v=>(v>=0?"+":"")+num(v);el("history-status").textContent="Turn report · "+signed(after.gold-snapshot.gold)+" treasury · "+signed(after.food-snapshot.food)+" provisions · "+signed(historyEngine.lands(historyState,historyState.player).length-snapshot.lands)+" centers. Review the chronicle for rival actions.";renderHistory()};
@@ -1863,6 +1879,34 @@ function createHistoryEngine(catalog) {
   el("history-zoom-out").onclick=()=>{historyZoom=Math.max(1,historyZoom-.5);drawEarth()};
   el("history-home").onclick=()=>{historyZoom=1;historyCenter=[540,240];drawEarth()};
   for(const [id,dx,dy] of [["west",-90,0],["east",90,0],["north",0,-60],["south",0,60]])el("history-pan-"+id).onclick=()=>{historyCenter=[Math.max(0,Math.min(1080,historyCenter[0]+dx/historyZoom)),Math.max(0,Math.min(480,historyCenter[1]+dy/historyZoom))];drawEarth()};
+  let directorTimer=null,directorRunning=false;
+  function directorPlan(){
+    const s=historyState,n=s.nations[s.player],own=historyEngine.lands(s,s.player),unstable=own.slice().sort((a,b)=>a.stability-b.stability)[0],weak=own.slice().sort((a,b)=>a.economy-b.economy)[0],damaged=own.find(p=>p.fort<3||p.stability<90);
+    if(n.food<60&&unstable)return{type:"relief",source:unstable.id,label:"deliver relief to "+unstable.name};
+    if(damaged&&n.gold>=35)return{type:"repair",source:damaged.id,label:"repair systems in "+damaged.name};
+    if(n.tech<historyEngine.eraAt(s.year)&&n.gold>=60)return{type:"research",source:s.source,label:"fund the next technology tier"};
+    if(weak&&weak.economy<10&&n.gold>=60)return{type:"develop",source:weak.id,label:"create infrastructure in "+weak.name};
+    if(weak&&n.tech>=2&&!weak.acted)return{type:"mine",source:weak.id,label:"mine resources in "+weak.name};
+    return{type:"tax",value:n.tax>1?1:.75,label:"stabilize domestic policy"};
+  }
+  function directorStep(){
+    if(historyState.over){stopDirector("Timeline complete. Director stopped.");return}
+    const mode=el("history-ai-mode").value,plan=directorPlan();
+    if(mode==="advisor"){el("history-ai-director-status").textContent="Recommendation: "+plan.label+". No action taken without changing mode.";return}
+    const result=historyEngine.action(historyState,plan.type,{source:plan.source,value:plan.value});
+    el("history-ai-director-status").textContent=result.ok?"Executed: "+plan.label+". Decision recorded in the chronicle.":"Plan paused: "+result.message;
+    if(result.ok||mode==="governor")historyEngine.nextTurn(historyState);renderHistory();
+  }
+  function stopDirector(message="Director stopped. You retain full control."){
+    if(directorTimer)clearInterval(directorTimer);directorTimer=null;directorRunning=false;el("history-ai-panel").classList.remove("ai-running");el("history-ai-toggle").textContent="Start AI Director";el("history-ai-director-status").textContent=message;
+  }
+  el("history-ai-toggle").onclick=()=>{
+    if(directorRunning){stopDirector();return}
+    directorRunning=true;el("history-ai-panel").classList.add("ai-running");el("history-ai-toggle").textContent="Stop AI Director";directorStep();
+    const speed=Number(el("history-ai-speed").value);if(speed>0)directorTimer=setInterval(directorStep,speed);
+  };
+  el("history-ai-mode").onchange=()=>{if(directorRunning)el("history-ai-director-status").textContent="Mode updated. The next cycle will follow the new policy."};
+  el("history-ai-speed").onchange=()=>{if(directorRunning){stopDirector("Clock changed. Restart the director to apply the new speed.")}};
   renderHistory();
 
   // HISTORY_BUNDLE_END

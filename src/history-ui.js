@@ -9,7 +9,7 @@
   const scenario=()=>HISTORY_CATALOG.scenarios.find(x=>x.id===historyState.scenario);
   const factionColor=id=>{const index=scenario().factions.findIndex(f=>f[0]===id);return index<0?"#9a9e9a":palette[index%palette.length]};
   const terrainColor={hill:"#ab9580",forest:"#688c72",plain:"#b4b071",river:"#66acb1",coast:"#87b4cc",desert:"#d0b280"};
-  const orderHelp={recruit:"Adds 4 formations; uses mobilization, 200 inhabitants and 3 morale.",develop:"Adds 1 infrastructure level, improving income and provisions.",fortify:"Adds 1 defense level; each level multiplies defensive strength by +25% of its base.",relief:"Restores up to 15 stability and 8 morale.",move:"Moves half of the available force, leaving a garrison; both centers mobilize.",war:"Ends trade with this faction and adds 8 war weariness. Attacks become available.",peace:"Stops this war and prevents a new declaration for 5 turns.",trade:"Adds 8 treasury income per turn while both partners hold territory and remain at peace.",attack:"Commits all but one formation. Terrain, morale, technology and supplies affect the outcome.",research:"Invests 60 treasury for 30 knowledge; at most once per turn."};
+  const orderHelp={recruit:"Adds 4 formations; uses mobilization, 200 inhabitants and 3 morale.",develop:"Creates infrastructure, improving income and provisions.",fortify:"Adds 1 defense level; each level multiplies defensive strength by +25% of its base.",relief:"Restores up to 15 stability and 8 morale.",mine:"Extracts treasury from local resources, uses mobilization and reduces stability.",repair:"Repairs defenses and civic systems while improving morale.",move:"Moves half of the available force, leaving a garrison; both centers mobilize.",war:"Ends trade with this faction and adds 8 war weariness. Attacks become available.",peace:"Stops this war and prevents a new declaration for 5 turns.",trade:"Adds 8 treasury income per turn while both partners hold territory and remain at peace.",envoy:"Opens a communication channel, reducing war weariness and improving foreign stability.",attack:"Commits all but one formation. Terrain, morale, technology and supplies affect the outcome.",research:"Invests 60 treasury for 30 knowledge; at most once per turn."};
   const reasonNodes={};
   for(const type of Object.keys(orderHelp)){
     const reason=type==="research"?el("history-research-reason"):document.createElement("small");
@@ -19,7 +19,7 @@
   let priorityCenter=null;
   function renderCommandHelp(){
     for(const type of Object.keys(orderHelp)){
-      const local=["recruit","develop","fortify","relief","move"].includes(type);
+      const local=["recruit","develop","fortify","relief","mine","repair","move"].includes(type);
       const preview=local&&historyState.target?{ok:false,message:"Select one of your own centers to issue this order."}:historyEngine.action(JSON.parse(JSON.stringify(historyState)),type,type==="move"?{target:el("history-move-target").value}:{});
       el("history-"+type).disabled=!preview.ok;
       reasonNodes[type].textContent=preview.ok?orderHelp[type]:preview.message;
@@ -176,7 +176,7 @@
     if(historyState.regions[historyState.target]?.owner===historyState.player)historyState.target=null;
     renderHistory();
   }
-  for(const type of ["recruit","develop","fortify","relief","attack","war","peace","trade","research"])el("history-"+type).onclick=()=>historicalOrder(type);
+  for(const type of ["recruit","develop","fortify","relief","mine","repair","attack","war","peace","trade","envoy","research"])el("history-"+type).onclick=()=>historicalOrder(type);
   el("history-tax").onchange=e=>historicalOrder("tax",{value:Number(e.target.value)});
   el("history-move").onclick=()=>historicalOrder("move",{target:el("history-move-target").value});
   el("history-end-turn").onclick=()=>{const before=historyState.nations[historyState.player],snapshot={gold:before.gold,food:before.food,lands:historyEngine.lands(historyState,historyState.player).length};historyEngine.nextTurn(historyState);const after=historyState.nations[historyState.player],signed=v=>(v>=0?"+":"")+num(v);el("history-status").textContent="Turn report · "+signed(after.gold-snapshot.gold)+" treasury · "+signed(after.food-snapshot.food)+" provisions · "+signed(historyEngine.lands(historyState,historyState.player).length-snapshot.lands)+" centers. Review the chronicle for rival actions.";renderHistory()};
@@ -190,4 +190,32 @@
   el("history-zoom-out").onclick=()=>{historyZoom=Math.max(1,historyZoom-.5);drawEarth()};
   el("history-home").onclick=()=>{historyZoom=1;historyCenter=[540,240];drawEarth()};
   for(const [id,dx,dy] of [["west",-90,0],["east",90,0],["north",0,-60],["south",0,60]])el("history-pan-"+id).onclick=()=>{historyCenter=[Math.max(0,Math.min(1080,historyCenter[0]+dx/historyZoom)),Math.max(0,Math.min(480,historyCenter[1]+dy/historyZoom))];drawEarth()};
+  let directorTimer=null,directorRunning=false;
+  function directorPlan(){
+    const s=historyState,n=s.nations[s.player],own=historyEngine.lands(s,s.player),unstable=own.slice().sort((a,b)=>a.stability-b.stability)[0],weak=own.slice().sort((a,b)=>a.economy-b.economy)[0],damaged=own.find(p=>p.fort<3||p.stability<90);
+    if(n.food<60&&unstable)return{type:"relief",source:unstable.id,label:"deliver relief to "+unstable.name};
+    if(damaged&&n.gold>=35)return{type:"repair",source:damaged.id,label:"repair systems in "+damaged.name};
+    if(n.tech<historyEngine.eraAt(s.year)&&n.gold>=60)return{type:"research",source:s.source,label:"fund the next technology tier"};
+    if(weak&&weak.economy<10&&n.gold>=60)return{type:"develop",source:weak.id,label:"create infrastructure in "+weak.name};
+    if(weak&&n.tech>=2&&!weak.acted)return{type:"mine",source:weak.id,label:"mine resources in "+weak.name};
+    return{type:"tax",value:n.tax>1?1:.75,label:"stabilize domestic policy"};
+  }
+  function directorStep(){
+    if(historyState.over){stopDirector("Timeline complete. Director stopped.");return}
+    const mode=el("history-ai-mode").value,plan=directorPlan();
+    if(mode==="advisor"){el("history-ai-director-status").textContent="Recommendation: "+plan.label+". No action taken without changing mode.";return}
+    const result=historyEngine.action(historyState,plan.type,{source:plan.source,value:plan.value});
+    el("history-ai-director-status").textContent=result.ok?"Executed: "+plan.label+". Decision recorded in the chronicle.":"Plan paused: "+result.message;
+    if(result.ok||mode==="governor")historyEngine.nextTurn(historyState);renderHistory();
+  }
+  function stopDirector(message="Director stopped. You retain full control."){
+    if(directorTimer)clearInterval(directorTimer);directorTimer=null;directorRunning=false;el("history-ai-panel").classList.remove("ai-running");el("history-ai-toggle").textContent="Start AI Director";el("history-ai-director-status").textContent=message;
+  }
+  el("history-ai-toggle").onclick=()=>{
+    if(directorRunning){stopDirector();return}
+    directorRunning=true;el("history-ai-panel").classList.add("ai-running");el("history-ai-toggle").textContent="Stop AI Director";directorStep();
+    const speed=Number(el("history-ai-speed").value);if(speed>0)directorTimer=setInterval(directorStep,speed);
+  };
+  el("history-ai-mode").onchange=()=>{if(directorRunning)el("history-ai-director-status").textContent="Mode updated. The next cycle will follow the new policy."};
+  el("history-ai-speed").onchange=()=>{if(directorRunning){stopDirector("Clock changed. Restart the director to apply the new speed.")}};
   renderHistory();

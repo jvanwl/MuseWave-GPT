@@ -81,7 +81,7 @@ export function createHistoryEngine(catalog) {
       if(n.science>=cost){n.science-=cost;n.tech++;log(s,n.name+" adopted "+eras[n.tech].unlock+".")}
       finish(s);return {ok:true};
     }
-    if(["war","peace","trade"].includes(type)){
+    if(["war","peace","trade","envoy"].includes(type)){
       if(!d||d.owner===actor)return fail("Select another faction.");
       if(type!=="peace"&&!contact(s,actor,d.owner))return fail("No contact route. Research navigation before transoceanic diplomacy.");
       const k=key(actor,d.owner);
@@ -94,10 +94,14 @@ export function createHistoryEngine(catalog) {
         if(!s.wars[k])return fail("There is no war to settle.");
         if(n.gold<40)return fail("An armistice costs 40 treasury.");
         n.gold-=40;delete s.wars[k];s.truces[k]=s.turn+5;log(s,"Five-turn armistice: "+n.name+" / "+s.nations[d.owner].name+".");
-      }else{
+      }else if(type==="trade"){
         if(s.wars[k]||s.treaties[k])return fail("Trade requires peace and no existing pact.");
         if(n.gold<30)return fail("A trade pact costs 30 treasury.");
         n.gold-=30;s.treaties[k]=true;log(s,"Trade agreement: "+n.name+" / "+s.nations[d.owner].name+".");
+      }else{
+        if(n.gold<15)return fail("A diplomatic mission requires 15 treasury.");
+        n.gold-=15;n.weariness=clamp(n.weariness-8,0,90);lands(s,d.owner).forEach(p=>p.stability=clamp(p.stability+2,0,100));
+        log(s,n.name+" opened a diplomatic channel with "+s.nations[d.owner].name+".");
       }
       return {ok:true};
     }
@@ -118,6 +122,16 @@ export function createHistoryEngine(catalog) {
     }else if(type==="relief"){
       if(n.gold<25||n.food<15)return fail("Requires 25 treasury and 15 provisions.");
       n.gold-=25;n.food-=15;p.stability=clamp(p.stability+15,0,100);p.morale=clamp(p.morale+8,20,100);
+    }else if(type==="mine"){
+      if(p.acted)return fail("This center has already mobilized this turn.");
+      if(n.tech<2)return fail("Mining requires metalworking technology.");
+      const yieldAmount=18+p.economy*4+(p.terrain==="hill"?18:p.terrain==="desert"?8:0);n.gold+=yieldAmount;p.stability=clamp(p.stability-5,0,100);p.acted=true;
+      log(s,p.name+" extracted resources worth "+yieldAmount+" treasury; local stability fell by 5.");
+    }else if(type==="repair"){
+      if(n.gold<35)return fail("Repairs require 35 treasury.");
+      if(p.fort>=3&&p.stability>=90)return fail("This center does not need repairs.");
+      n.gold-=35;p.fort=clamp(p.fort+1,0,3);p.stability=clamp(p.stability+8,0,100);p.morale=clamp(p.morale+5,20,100);
+      log(s,p.name+" repaired defenses and civic infrastructure.");
     }else if(type==="move"||type==="attack"){
       if(!d||!routes(s,p.id,actor).some(link=>link.id===d.id))return fail("No available route. Some sea routes require later technology.");
       if(p.acted||p.army<2)return fail("No uncommitted forces.");
