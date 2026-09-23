@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import { registerAppResource, registerAppTool, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -13,6 +14,7 @@ const PORT = Number(process.env.PORT || 8787);
 const ENGINE_URL = (process.env.MUSEWAVE_ENGINE_URL || "").replace(/\/$/, "");
 const ENGINE_TOKEN = process.env.MUSEWAVE_ENGINE_TOKEN || "";
 const UI_URI = "ui://musewave/studio.html";
+const MAX_JSON_BYTES = 64 * 1024;
 const widgetHtml = readFileSync(new URL("./public/music-studio.html", import.meta.url), "utf8");
 
 const projectSchema = z.object({
@@ -26,6 +28,18 @@ const projectSchema = z.object({
 const projectOutput = { project: projectSchema, account: z.any() };
 const genres = ["Pop", "Electronic", "Hip-hop", "R&B", "Rock", "Ambient", "Latin", "Afrobeats", "Cinematic"];
 const moods = ["Euphoric", "Dreamy", "Dark", "Romantic", "Focused", "Nostalgic", "Confident", "Peaceful"];
+const conceptInputSchema = z.object({
+  title: z.string().max(80).optional(), prompt: z.string().min(3).max(1500),
+  genre: z.enum(genres), mood: z.enum(moods), energy: z.number().int().min(1).max(5),
+  duration: z.number().int().min(15).max(600), mode: z.enum(["instrumental", "vocal"]),
+  quality: z.enum(["draft", "studio"]).default("draft"), language: z.string().max(40).default("English"),
+  lyrics: z.string().max(4000).default(""), seed: z.string().max(80).optional(),
+}).strict();
+const consentSchema = z.object({ enabled: z.boolean() }).strict();
+const feedbackSchema = z.object({ projectId: z.string().min(1).max(120), rating: z.number().int().min(1).max(5), tags: z.array(z.string().max(30)).max(8).default([]) }).strict();
+const checkoutSchema = z.object({ planId: z.enum(["creator", "pro", "studio"]) }).strict();
+
+class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 
 function hash(text) { return [...text].reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0); }
 function accountPayload() { return { ...billingStatus(getAccount()), projectsCount: listProjects().length, learning: getLearningStatus() }; }
@@ -46,16 +60,37 @@ function buildConcept(input, cost) {
   };
 }
 
-async function readJson(req) {
+export async function readJson(req) {
+  const type = String(req.headers["content-type"] || "").split(";", 1)[0].trim().toLowerCase();
+  if (type !== "application/json") throw new HttpError(415, "Content-Type must be application/json");
   const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > MAX_JSON_BYTES) throw new HttpError(413, "Request body is too large");
+    chunks.push(chunk);
+  }
   if (!chunks.length) return {};
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
+  catch { throw new HttpError(400, "Request body must contain valid JSON"); }
+}
+
+async function validatedJson(req, schema) {
+  const result = schema.safeParse(await readJson(req));
+  if (!result.success) throw new HttpError(422, "Request fields are invalid");
+  return result.data;
 }
 
 function json(res, status, payload) {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
   res.end(JSON.stringify(payload));
+}
+
+function setSecurityHeaders(res) {
+  res.setHeader("x-content-type-options", "nosniff");
+  res.setHeader("referrer-policy", "no-referrer");
+  res.setHeader("permissions-policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("cross-origin-resource-policy", "same-origin");
 }
 
 function engineHeaders(jsonBody = false) {
@@ -96,13 +131,7 @@ function createMuseWaveServer() {
   registerAppTool(server, "create_music_concept", {
     title: "Create an original music concept",
     description: "Create and save an original track concept. Named-artist imitation and unauthorized voice cloning are not supported.",
-    inputSchema: {
-      title: z.string().max(80).optional(), prompt: z.string().min(3).max(1500),
-      genre: z.enum(genres), mood: z.enum(moods), energy: z.number().int().min(1).max(5),
-      duration: z.number().int().min(15).max(600), mode: z.enum(["instrumental", "vocal"]),
-      quality: z.enum(["draft", "studio"]).default("draft"), language: z.string().max(40).default("English"),
-      lyrics: z.string().max(4000).default(""), seed: z.string().max(80).optional(),
-    }, outputSchema: projectOutput, _meta: { ui: { resourceUri: UI_URI } },
+    inputSchema: conceptInputSchema.shape, outputSchema: projectOutput, _meta: { ui: { resourceUri: UI_URI } },
   }, async (input) => {
     let result;
     try { result = createConcept(input); }
@@ -158,8 +187,8 @@ function createMuseWaveServer() {
   return server;
 }
 
-const httpServer = createServer(async (req, res) => {
-  res.setHeader("x-content-type-options", "nosniff");
+export function createHttpServer() { return createServer(async (req, res) => {
+  setSecurityHeaders(res);
   if (req.method === "GET" && req.url === "/") {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" });
     res.end(widgetHtml);
@@ -176,16 +205,20 @@ const httpServer = createServer(async (req, res) => {
       return json(res, 200, { configured: true, ...(await (await engineFetch("/health")).json()) });
     }
     if (req.method === "POST" && req.url === "/api/engine/generate") {
-      const response = await engineFetch("/v1/generate", { method: "POST", body: JSON.stringify(await readJson(req)) });
+      const input = conceptInputSchema.pick({ prompt:true, genre:true, mood:true, energy:true, mode:true, language:true, lyrics:true }).extend({ bpm:z.number().int().min(50).max(220), seed:z.number().int().optional() }).strict();
+      const response = await engineFetch("/v1/generate", { method: "POST", body: JSON.stringify(await validatedJson(req, input)) });
       res.writeHead(200, { "content-type": "audio/wav", "cache-control": "private, no-store", "x-musewave-seed": response.headers.get("x-musewave-seed") || "" });
       res.end(Buffer.from(await response.arrayBuffer())); return;
     }
-    if (req.method === "POST" && req.url === "/api/concepts") return json(res, 201, { structuredContent: createConcept(await readJson(req)) });
-    if (req.method === "POST" && req.url === "/api/learning/consent") { const body = await readJson(req); const learning = setLearningConsent(body.enabled); return json(res, 200, { structuredContent: { learning, account: accountPayload() } }); }
-    if (req.method === "POST" && req.url === "/api/feedback") { const body = await readJson(req); const learning = recordFeedback(body); return json(res, 200, { structuredContent: { learning, profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } }); }
-    if (req.method === "POST" && req.url === "/api/checkout") { const body = await readJson(req); return json(res, 200, { structuredContent: { checkout: checkoutFor(body.planId) } }); }
+    if (req.method === "POST" && req.url === "/api/concepts") return json(res, 201, { structuredContent: createConcept(await validatedJson(req, conceptInputSchema)) });
+    if (req.method === "POST" && req.url === "/api/learning/consent") { const body = await validatedJson(req, consentSchema); const learning = setLearningConsent(body.enabled); return json(res, 200, { structuredContent: { learning, account: accountPayload() } }); }
+    if (req.method === "POST" && req.url === "/api/feedback") { const body = await validatedJson(req, feedbackSchema); const learning = recordFeedback(body); return json(res, 200, { structuredContent: { learning, profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } }); }
+    if (req.method === "POST" && req.url === "/api/checkout") { const body = await validatedJson(req, checkoutSchema); return json(res, 200, { structuredContent: { checkout: checkoutFor(body.planId) } }); }
   } catch (error) {
-    return json(res, 400, { error: error.message });
+    const clientErrors = new Set(["Not enough credits", "Personalization consent is required", "Project not found", "Unknown paid plan", "Billing is not configured"]);
+    const status = error instanceof HttpError ? error.status : clientErrors.has(error.message) ? 400 : 500;
+    if (status >= 500) console.error("Request failed", { method: req.method, path: req.url, error: error?.message });
+    return json(res, status, { error: status >= 500 ? "Service unavailable" : error.message });
   }
   if (req.url === "/mcp") {
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
@@ -193,6 +226,13 @@ const httpServer = createServer(async (req, res) => {
     const server = createMuseWaveServer(); await server.connect(transport); await transport.handleRequest(req, res); return;
   }
   res.writeHead(404, { "content-type": "application/json" }); res.end(JSON.stringify({ error: "Not found" }));
-});
+}); }
 
-httpServer.listen(PORT, () => console.log(`MuseWave GPT v0.3 listening on http://localhost:${PORT}/mcp`));
+export function startServer(port = PORT) {
+  const httpServer = createHttpServer();
+  httpServer.listen(port, () => console.log(`MuseWave GPT v0.3 listening on http://localhost:${port}/mcp`));
+  const close = () => httpServer.close(() => process.exit(0));
+  process.once("SIGTERM", close); process.once("SIGINT", close);
+  return httpServer;
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) startServer();

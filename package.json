@@ -1,9 +1,9 @@
 {
-  "name": "musewave-gpt",
-  "version": "0.3.0",
+  "name": "epoch-atlas",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "A monetization-ready AI music creation studio for ChatGPT.",
+  "description": "A living-world grand strategy game spanning every era of human history.",
   "scripts": {
     "dev": "node --watch server.mjs",
     "start": "node server.mjs",

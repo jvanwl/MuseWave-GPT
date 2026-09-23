@@ -25,6 +25,8 @@ The project does **not** clone voices or imitate named artists. Neural audio gen
 - Optional 32→16-neuron PyTorch ranking model with controlled offline training
 - Model-readiness, version, confidence, and feedback status UI
 - Health endpoint and automated tests
+- Bounded JSON request bodies, strict REST validation, security headers, and graceful shutdown
+- Daily opt-in Autopilot that proposes bounded, tested changes as review requests
 
 ## Run locally
 
@@ -46,6 +48,12 @@ To use it from ChatGPT, expose the local server over HTTPS during development an
 See [`engine/README.md`](engine/README.md). The API returns `ready: false` until a trained checkpoint is mounted, preventing an untrained model or browser oscillator from being represented as generated singing. Deploy it on a CUDA GPU and set `MUSEWAVE_ENGINE_URL` only after evaluation.
 
 The Supabase schema is staged in [`supabase/schema.sql`](supabase/schema.sql). It was not applied automatically because the connected Supabase account currently exposes no projects. Create or connect the intended project first, then review and apply the schema and run the Supabase security/performance advisors.
+
+## Automated maintenance
+
+See [`AUTOPILOT.md`](AUTOPILOT.md). The scheduled workflow is installed but remains
+inactive until its GitHub variables and provider secret are configured. Passing
+proposals open a review request; they are never merged or deployed automatically.
 
 ## Turn on monetization later
 

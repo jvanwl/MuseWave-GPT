@@ -5,5 +5,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY musewave_engine ./musewave_engine
 COPY train.py .
 ENV PYTHONPATH=/app
+RUN useradd --create-home --uid 10001 musewave && chown -R musewave:musewave /app
+USER musewave
 CMD ["uvicorn", "musewave_engine.api:app", "--host", "0.0.0.0", "--port", "8080"]
-

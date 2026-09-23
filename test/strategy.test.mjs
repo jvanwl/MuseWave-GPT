@@ -156,6 +156,8 @@ for(const mode of ['normal','blocked','corrupt'])test('UI is usable with '+mode+
   assert.equal(nodes.get('history-date').textContent,'1444 CE');
   const beforePreview=saves.get('musewave-human-history-v4');
   assert.equal(nodes.get('history-territories').children.length,1);
+  assert.ok(nodes.get('history-world-ranking').children.length>=2);
+  assert.match(nodes.get('history-world-pulse').textContent,/your rank #/);
   assert.equal(nodes.get('history-roadmap').children.length,10);
   nodes.get('history-region-select').onchange({target:{value:catalog.regions.find(p=>p[1]==='North China')[0]}});
   assert.equal(nodes.get('history-recruit').disabled,true,'Foreign inspection must not recruit at a hidden friendly source');
