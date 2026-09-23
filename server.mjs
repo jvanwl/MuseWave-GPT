@@ -9,6 +9,7 @@ import { billingStatus, checkoutFor } from "./src/billing.mjs";
 import { FREE_BETA, generationCost, PLANS } from "./src/plans.mjs";
 import { buildPreferenceProfile } from "./src/learning.mjs";
 import { canSpend, exportTrainingExamples, getAccount, getLearningStatus, listProjects, recordFeedback, saveProject, setLearningConsent } from "./src/store.mjs";
+import { createNexusCore } from "./src/nexus-core.mjs";
 
 const PORT = Number(process.env.PORT || 8787);
 const ENGINE_URL = (process.env.MUSEWAVE_ENGINE_URL || "").replace(/\/$/, "");
@@ -18,6 +19,7 @@ const MAX_JSON_BYTES = 64 * 1024;
 const widgetHtml = readFileSync(new URL("./public/sovereign-ai.html", import.meta.url), "utf8");
 const NEXUS_MODEL_URL = (process.env.NEXUS_MODEL_URL || "").replace(/\/$/, "");
 const NEXUS_MODEL_TOKEN = process.env.NEXUS_MODEL_TOKEN || "";
+const nexusCore=createNexusCore({providerReady:()=>Boolean(NEXUS_MODEL_URL)});
 
 const projectSchema = z.object({
   id: z.string(), title: z.string(), prompt: z.string(), genre: z.string(), mood: z.string(),
@@ -41,6 +43,8 @@ const consentSchema = z.object({ enabled: z.boolean() }).strict();
 const feedbackSchema = z.object({ projectId: z.string().min(1).max(120), rating: z.number().int().min(1).max(5), tags: z.array(z.string().max(30)).max(8).default([]) }).strict();
 const checkoutSchema = z.object({ planId: z.enum(["creator", "pro", "studio"]) }).strict();
 const sovereignInputSchema = z.object({ prompt:z.string().min(2).max(6000), mode:z.enum(["strategist","builder","repair","revenue","research"]).default("strategist") }).strict();
+const researchInputSchema=z.object({question:z.string().min(3).max(2000),objective:z.string().max(2000).default(""),sources:z.array(z.string().max(500)).max(12).default([])}).strict();
+const memoryInputSchema=z.object({content:z.string().min(2).max(6000),source:z.string().max(80).default("owner"),outcome:z.boolean().nullable().default(null),tags:z.array(z.string().max(40)).max(10).default([])}).strict();
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 
@@ -225,8 +229,10 @@ export function createHttpServer() { return createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/favicon.ico") { res.writeHead(204); res.end(); return; }
   if (req.method === "GET" && req.url === "/health") { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ ok: true, name: "nexus-sovereign", version: "1.0.0", providerConfigured:Boolean(NEXUS_MODEL_URL) })); return; }
   try {
-    if(req.method==="GET"&&req.url==="/api/ai/status")return json(res,200,{ready:true,providerConfigured:Boolean(NEXUS_MODEL_URL),approvalRequired:true});
+    if(req.method==="GET"&&req.url==="/api/ai/status")return json(res,200,{ready:true,providerConfigured:Boolean(NEXUS_MODEL_URL),approvalRequired:true,core:nexusCore.snapshot()});
     if(req.method==="POST"&&req.url==="/api/ai/ask")return json(res,200,await askSovereign(await validatedJson(req,sovereignInputSchema)));
+    if(req.method==="POST"&&req.url==="/api/ai/research")return json(res,202,{job:nexusCore.research(await validatedJson(req,researchInputSchema)),core:nexusCore.snapshot()});
+    if(req.method==="POST"&&req.url==="/api/ai/memory")return json(res,201,{memory:nexusCore.remember(await validatedJson(req,memoryInputSchema)),core:nexusCore.snapshot()});
     if (req.method === "GET" && req.url === "/api/bootstrap") return json(res, 200, { structuredContent: { account: accountPayload(), projects: listProjects(), plans: Object.values(PLANS) } });
     if (req.method === "GET" && req.url === "/api/projects") return json(res, 200, { structuredContent: { projects: listProjects(), account: accountPayload() } });
     if (req.method === "GET" && req.url === "/api/learning") return json(res, 200, { structuredContent: { learning: getLearningStatus(), profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } });
