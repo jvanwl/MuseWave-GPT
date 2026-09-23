@@ -1,0 +1,2 @@
+import test from "node:test";import assert from "node:assert/strict";import { evaluateRevenueExperiment,revenueStatus } from "../src/nexus-revenue.mjs";
+test("revenue experiments measure real customers and profit without promising returns",()=>{const r=evaluateRevenueExperiment({visitors:100,signups:12,customers:4,revenue:196,cost:60});assert.equal(r.conversionRate,.04);assert.equal(r.profit,136);assert.equal(r.validated,true);assert.equal(revenueStatus().principles.includes("No guaranteed returns"),true)});

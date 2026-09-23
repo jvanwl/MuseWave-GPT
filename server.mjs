@@ -10,6 +10,8 @@ import { FREE_BETA, generationCost, PLANS } from "./src/plans.mjs";
 import { buildPreferenceProfile } from "./src/learning.mjs";
 import { canSpend, exportTrainingExamples, getAccount, getLearningStatus, listProjects, recordFeedback, saveProject, setLearningConsent } from "./src/store.mjs";
 import { createNexusCore } from "./src/nexus-core.mjs";
+import { NexusModel, NEXUS_LABELS } from "./src/nexus-model.mjs";
+import { checkoutForNexus, evaluateRevenueExperiment, revenueStatus } from "./src/nexus-revenue.mjs";
 
 const PORT = Number(process.env.PORT || 8787);
 const ENGINE_URL = (process.env.MUSEWAVE_ENGINE_URL || "").replace(/\/$/, "");
@@ -20,6 +22,7 @@ const widgetHtml = readFileSync(new URL("./public/sovereign-ai.html", import.met
 const NEXUS_MODEL_URL = (process.env.NEXUS_MODEL_URL || "").replace(/\/$/, "");
 const NEXUS_MODEL_TOKEN = process.env.NEXUS_MODEL_TOKEN || "";
 const nexusCore=createNexusCore({providerReady:()=>Boolean(NEXUS_MODEL_URL)});
+const nexusModel=new NexusModel().seed();
 
 const projectSchema = z.object({
   id: z.string(), title: z.string(), prompt: z.string(), genre: z.string(), mood: z.string(),
@@ -42,9 +45,12 @@ const conceptInputSchema = z.object({
 const consentSchema = z.object({ enabled: z.boolean() }).strict();
 const feedbackSchema = z.object({ projectId: z.string().min(1).max(120), rating: z.number().int().min(1).max(5), tags: z.array(z.string().max(30)).max(8).default([]) }).strict();
 const checkoutSchema = z.object({ planId: z.enum(["creator", "pro", "studio"]) }).strict();
-const sovereignInputSchema = z.object({ prompt:z.string().min(2).max(6000), mode:z.enum(["strategist","builder","repair","revenue","research"]).default("strategist") }).strict();
+const sovereignInputSchema = z.object({ prompt:z.string().min(2).max(6000), mode:z.enum(["auto","strategist","builder","repair","revenue","research"]).default("auto") }).strict();
 const researchInputSchema=z.object({question:z.string().min(3).max(2000),objective:z.string().max(2000).default(""),sources:z.array(z.string().max(500)).max(12).default([])}).strict();
 const memoryInputSchema=z.object({content:z.string().min(2).max(6000),source:z.string().max(80).default("owner"),outcome:z.boolean().nullable().default(null),tags:z.array(z.string().max(40)).max(10).default([])}).strict();
+const learningInputSchema=z.object({prompt:z.string().min(2).max(6000),correctMode:z.enum(NEXUS_LABELS)}).strict();
+const revenueExperimentSchema=z.object({visitors:z.number().min(0),signups:z.number().min(0),customers:z.number().min(0),revenue:z.number().min(0),cost:z.number().min(0)}).strict();
+const nexusCheckoutSchema=z.object({planId:z.enum(["solo","builder","business"])}).strict();
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 
@@ -130,14 +136,15 @@ function localSovereign(input) {
 }
 
 async function askSovereign(input) {
-  let response=localSovereign(input),providerConfigured=Boolean(NEXUS_MODEL_URL);
+  const prediction=nexusModel.predict(input.prompt),effectiveMode=input.mode==="auto"?prediction.label:input.mode;
+  let response=localSovereign({...input,mode:effectiveMode}),providerConfigured=Boolean(NEXUS_MODEL_URL);
   if(providerConfigured){
-    const request=await fetch(`${NEXUS_MODEL_URL}/v1/chat/completions`,{method:"POST",headers:{"content-type":"application/json",...(NEXUS_MODEL_TOKEN?{authorization:`Bearer ${NEXUS_MODEL_TOKEN}`}:{})},body:JSON.stringify({model:process.env.NEXUS_MODEL||"default",temperature:.3,max_tokens:1200,messages:[{role:"system",content:"You are NEXUS, an owner-controlled AI copilot. Help create, repair, research and design ethical revenue strategies. Never claim guaranteed income. Never imply an external action happened unless a tool confirms it. Code changes, deployments, purchases, credentials and financial actions require explicit owner approval."},{role:"user",content:`Mode: ${input.mode}\nObjective: ${input.prompt}`}]}) ,signal:AbortSignal.timeout(60_000)});
+    const request=await fetch(`${NEXUS_MODEL_URL}/v1/chat/completions`,{method:"POST",headers:{"content-type":"application/json",...(NEXUS_MODEL_TOKEN?{authorization:`Bearer ${NEXUS_MODEL_TOKEN}`}:{})},body:JSON.stringify({model:process.env.NEXUS_MODEL||"default",temperature:.3,max_tokens:1200,messages:[{role:"system",content:"You are NEXUS, an owner-controlled AI copilot. Help create, repair, research and design ethical revenue strategies. Never claim guaranteed income. Never imply an external action happened unless a tool confirms it. Code changes, deployments, purchases, credentials and financial actions require explicit owner approval."},{role:"user",content:`Mode: ${effectiveMode}\nObjective: ${input.prompt}`}]}) ,signal:AbortSignal.timeout(60_000)});
     if(!request.ok)throw new Error(`Model provider returned ${request.status}`);
     const data=await request.json();response=String(data.choices?.[0]?.message?.content||"").slice(0,12000)||response;
   }
-  const needsApproval=["builder","repair","revenue"].includes(input.mode);
-  return {response,mode:input.mode,providerConfigured,proposal:needsApproval?{id:`nx_${Date.now().toString(36)}`,title:input.mode==="repair"?"Review proposed repair":input.mode==="builder"?"Review proposed build":"Review revenue experiment",detail:"Approval records intent only. External execution requires a connected, authorized provider."}:null};
+  const needsApproval=["builder","repair","revenue"].includes(effectiveMode);
+  return {response,mode:effectiveMode,providerConfigured,ownModel:{...prediction,active:true},proposal:needsApproval?{id:`nx_${Date.now().toString(36)}`,title:effectiveMode==="repair"?"Review proposed repair":effectiveMode==="builder"?"Review proposed build":"Review revenue experiment",detail:"Approval records intent only. External execution requires a connected, authorized provider."}:null};
 }
 
 function createSovereignServer(){
@@ -229,10 +236,14 @@ export function createHttpServer() { return createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/favicon.ico") { res.writeHead(204); res.end(); return; }
   if (req.method === "GET" && req.url === "/health") { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ ok: true, name: "nexus-sovereign", version: "1.0.0", providerConfigured:Boolean(NEXUS_MODEL_URL) })); return; }
   try {
-    if(req.method==="GET"&&req.url==="/api/ai/status")return json(res,200,{ready:true,providerConfigured:Boolean(NEXUS_MODEL_URL),approvalRequired:true,core:nexusCore.snapshot()});
+    if(req.method==="GET"&&req.url==="/api/ai/status")return json(res,200,{ready:true,providerConfigured:Boolean(NEXUS_MODEL_URL),ownModel:{active:true,version:nexusModel.version,examples:nexusModel.examples},approvalRequired:true,core:nexusCore.snapshot()});
     if(req.method==="POST"&&req.url==="/api/ai/ask")return json(res,200,await askSovereign(await validatedJson(req,sovereignInputSchema)));
     if(req.method==="POST"&&req.url==="/api/ai/research")return json(res,202,{job:nexusCore.research(await validatedJson(req,researchInputSchema)),core:nexusCore.snapshot()});
     if(req.method==="POST"&&req.url==="/api/ai/memory")return json(res,201,{memory:nexusCore.remember(await validatedJson(req,memoryInputSchema)),core:nexusCore.snapshot()});
+    if(req.method==="POST"&&req.url==="/api/ai/learn"){const body=await validatedJson(req,learningInputSchema);const prediction=nexusModel.learn(body.prompt,body.correctMode);nexusCore.remember({content:body.prompt,source:"owner_feedback",outcome:true,tags:[body.correctMode]});return json(res,200,{learned:true,prediction,model:{version:nexusModel.version,examples:nexusModel.examples}})}
+    if(req.method==="GET"&&req.url==="/api/revenue/status")return json(res,200,revenueStatus());
+    if(req.method==="POST"&&req.url==="/api/revenue/experiment")return json(res,200,evaluateRevenueExperiment(await validatedJson(req,revenueExperimentSchema)));
+    if(req.method==="POST"&&req.url==="/api/revenue/checkout")return json(res,200,checkoutForNexus((await validatedJson(req,nexusCheckoutSchema)).planId));
     if (req.method === "GET" && req.url === "/api/bootstrap") return json(res, 200, { structuredContent: { account: accountPayload(), projects: listProjects(), plans: Object.values(PLANS) } });
     if (req.method === "GET" && req.url === "/api/projects") return json(res, 200, { structuredContent: { projects: listProjects(), account: accountPayload() } });
     if (req.method === "GET" && req.url === "/api/learning") return json(res, 200, { structuredContent: { learning: getLearningStatus(), profile: buildPreferenceProfile(exportTrainingExamples()), account: accountPayload() } });
